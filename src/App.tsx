@@ -1,23 +1,35 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
-import Login from "./pages/Login";
-import ProjectsList from "./pages/ProjectsList";
-import ProjectNew from "./pages/ProjectNew";
-import ProjectEdit from "./pages/ProjectEdit";
-
-
+import { Loader2 } from "lucide-react";
 import { Toaster } from "sonner";
+
+const Login = lazy(() => import("./pages/Login"));
+const ProjectsList = lazy(() => import("./pages/ProjectsList"));
+const ProjectNew = lazy(() => import("./pages/ProjectNew"));
+const ProjectEdit = lazy(() => import("./pages/ProjectEdit"));
 
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public route — no auth needed */}
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-screen bg-zinc-950">
+                  <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+                </div>
+              }
+            >
+              <Login />
+            </Suspense>
+          }
+        />
 
-        {/* Protected routes — must be logged in */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
             <Route path="/" element={<Navigate to="/projects" replace />} />

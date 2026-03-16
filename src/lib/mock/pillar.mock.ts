@@ -1,6 +1,6 @@
-import type { Project } from "../types/project";
+import type { Pillar } from "../types/pillar";
 
-export const MOCK_PROJECTS: Project[] = [
+export const MOCK_PROJECTS: Pillar[] = [
   {
     slug: "solution-finder",
     title: "SolutionFinder & Management",

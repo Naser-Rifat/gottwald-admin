@@ -1,4 +1,4 @@
-import type { ContentBlock, ProjectTheme } from "../lib/types/project";
+import type { ContentBlock, ProjectTheme } from "../lib/types/pillar";
 import { Eye, EyeOff, ArrowLeft, ExternalLink } from "lucide-react";
 
 interface ProjectPreviewData {
@@ -20,7 +20,11 @@ interface ProjectPreviewProps {
   onToggle: () => void;
 }
 
-export default function ProjectPreview({ data, visible, onToggle }: ProjectPreviewProps) {
+export default function ProjectPreview({
+  data,
+  visible,
+  onToggle,
+}: ProjectPreviewProps) {
   const { theme, contentBlocks } = data;
   const bg = theme.background || "#121212";
   const txt = theme.text || "#F5F5F5";
@@ -35,7 +39,11 @@ export default function ProjectPreview({ data, visible, onToggle }: ProjectPrevi
         className="w-full flex items-center justify-between px-5 py-3.5 rounded-xl border border-zinc-700/60 bg-zinc-900/80 text-sm font-semibold text-zinc-200 hover:border-zinc-600 hover:bg-zinc-800/80 transition-all group"
       >
         <span className="flex items-center gap-2.5">
-          {visible ? <Eye className="w-4 h-4 text-emerald-400" /> : <EyeOff className="w-4 h-4 text-zinc-500" />}
+          {visible ? (
+            <Eye className="w-4 h-4 text-emerald-400" />
+          ) : (
+            <EyeOff className="w-4 h-4 text-zinc-500" />
+          )}
           Live Preview — Public Website
         </span>
         <span className="text-xs font-medium text-zinc-500 group-hover:text-zinc-400 transition-colors">
@@ -45,7 +53,7 @@ export default function ProjectPreview({ data, visible, onToggle }: ProjectPrevi
 
       {!visible && (
         <p className="text-xs text-zinc-600 text-center">
-          Toggle to see how this project will look on the public website.
+          Toggle to see how this pillar will look on the public website.
         </p>
       )}
 
@@ -53,7 +61,10 @@ export default function ProjectPreview({ data, visible, onToggle }: ProjectPrevi
         <div className="rounded-xl overflow-hidden border border-zinc-700/40 shadow-2xl">
           {/* Scale wrapper — preview is rendered at reduced scale */}
           <div className="overflow-x-auto overflow-y-hidden scrollbar-thin">
-            <div className="flex" style={{ minWidth: `${(1 + contentBlocks.length) * 820}px` }}>
+            <div
+              className="flex"
+              style={{ minWidth: `${(1 + contentBlocks.length) * 820}px` }}
+            >
               {/* ═══ PANEL 1 — Hero ═══ */}
               <HeroPanel data={data} bg={bg} txt={txt} accent={accent} />
 
@@ -71,7 +82,8 @@ export default function ProjectPreview({ data, visible, onToggle }: ProjectPrevi
           {/* Info Bar */}
           <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-950 border-t border-zinc-800">
             <span className="text-[10px] font-mono text-zinc-600">
-              {1 + contentBlocks.length} panel{contentBlocks.length > 0 ? "s" : ""} · horizontal scroll →
+              {1 + contentBlocks.length} panel
+              {contentBlocks.length > 0 ? "s" : ""} · horizontal scroll →
             </span>
             <span className="text-[10px] text-zinc-600">
               Scroll to preview all panels
@@ -116,7 +128,10 @@ function HeroPanel({
         className="absolute top-0 left-0 w-full flex justify-between items-center z-10"
         style={{ padding: "16px 36px" }}
       >
-        <span className="flex items-center gap-1.5 text-xs opacity-50" style={{ color: txt }}>
+        <span
+          className="flex items-center gap-1.5 text-xs opacity-50"
+          style={{ color: txt }}
+        >
           <ArrowLeft className="w-3 h-3" />
           back
         </span>
@@ -144,7 +159,7 @@ function HeroPanel({
             color: txt,
           }}
         >
-          {data.title || "Project Title"}
+          {data.title || "Pillar Title"}
         </h1>
 
         <div className="flex gap-5" style={{ alignItems: "flex-start" }}>
@@ -273,7 +288,9 @@ function ContentBlockPanel({
       <div
         className="absolute top-3 left-4 text-[9px] font-mono px-2 py-0.5 rounded-full"
         style={{
-          backgroundColor: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+          backgroundColor: isLight
+            ? "rgba(0,0,0,0.06)"
+            : "rgba(255,255,255,0.06)",
           color: mutedColor,
         }}
       >
@@ -286,7 +303,9 @@ function ContentBlockPanel({
           style={{ color: mutedColor }}
         >
           <span className="text-sm opacity-50">Empty block</span>
-          <span className="text-[10px] opacity-30">Add heading, body, or image</span>
+          <span className="text-[10px] opacity-30">
+            Add heading, body, or image
+          </span>
         </div>
       ) : (
         <>

@@ -1,14 +1,19 @@
-import type { Project } from "../lib/types/project";
+import type { Pillar } from "../lib/types/pillar";
 import { Pencil, Trash2 } from "lucide-react";
 
-interface ProjectCardProps {
-  project: Project;
+interface PillarCardProps {
+  project: Pillar;
   onEdit: (slug: string) => void;
   onDelete: (slug: string) => void;
   deleting: boolean;
 }
 
-export default function ProjectCard({ project, onEdit, onDelete, deleting }: ProjectCardProps) {
+export default function ProjectCard({
+  project,
+  onEdit,
+  onDelete,
+  deleting,
+}: PillarCardProps) {
   return (
     <div className="group relative rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden transition-all hover:border-zinc-700 hover:bg-zinc-900">
       {/* Cover Image */}

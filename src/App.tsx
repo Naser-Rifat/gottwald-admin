@@ -7,9 +7,9 @@ import { Loader2 } from "lucide-react";
 import { Toaster } from "sonner";
 
 const Login = lazy(() => import("./pages/Login"));
-const ProjectsList = lazy(() => import("./pages/ProjectsList"));
-const ProjectNew = lazy(() => import("./pages/ProjectNew"));
-const ProjectEdit = lazy(() => import("./pages/ProjectEdit"));
+const PillarsList = lazy(() => import("./pages/PillarsList"));
+const PillarNew = lazy(() => import("./pages/PillarNew"));
+const PillarEdit = lazy(() => import("./pages/PillarEdit"));
 
 export default function App() {
   return (
@@ -33,9 +33,9 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
             <Route path="/" element={<Navigate to="/projects" replace />} />
-            <Route path="/projects" element={<ProjectsList />} />
-            <Route path="/projects/new" element={<ProjectNew />} />
-            <Route path="/projects/:slug" element={<ProjectEdit />} />
+            <Route path="/projects" element={<PillarsList />} />
+            <Route path="/projects/new" element={<PillarNew />} />
+            <Route path="/projects/:slug" element={<PillarEdit />} />
           </Route>
         </Route>
       </Routes>

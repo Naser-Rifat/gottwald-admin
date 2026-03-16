@@ -4,7 +4,7 @@ import { FolderKanban, Settings } from "lucide-react";
 
 
 const navItems = [
-  { to: "/projects", label: "Projects", icon: FolderKanban },
+  { to: "/projects", label: "Pillars", icon: FolderKanban },
   { to: "#", label: "Settings", icon: Settings, disabled: true },
 ];
 
@@ -13,9 +13,9 @@ export default function AdminSidebar() {
     <>
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-6 border-b border-zinc-800">
-        <img src="/logo.png" alt="Gottwald Admin" width={32} height={32} className="rounded-full" />
+        <img src="/logo.png" alt="Gott Wald HLC." width={32} height={32} className="rounded-full" />
         <span className="text-sm font-bold tracking-wide text-zinc-100 uppercase">
-          Gottwald Admin
+          Gott wald HLC.
         </span>
       </div>
 

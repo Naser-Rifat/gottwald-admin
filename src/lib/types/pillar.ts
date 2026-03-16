@@ -5,18 +5,20 @@ export interface ContentBlock {
   type: "rich-text" | "image" | "video";
   theme?: "light" | "dark";
   heading?: string;
-  body?: string; // For rich-text, this will contain HTML
+  body?: string;
   image?: string;
   videoUrl?: string;
+  /** Transient — carries the File for upload, never sent to the API */
+  _imageFile?: File;
 }
 
-export interface ProjectTheme {
+export interface PillarTheme {
   background: string;
   text: string;
   accent: string;
 }
 
-export interface Project {
+export interface Pillar {
   slug: string;
   title: string;
   tags: string[];
@@ -26,8 +28,8 @@ export interface Project {
   details: string;
   services: string[];
   contentBlocks: ContentBlock[];
-  theme: ProjectTheme;
+  theme: PillarTheme;
 }
 
-export type CreateProjectPayload = Project;
-export type UpdateProjectPayload = Partial<Project>;
+export type CreatePillarPayload = Pillar;
+export type UpdatePillarPayload = Partial<Pillar>;

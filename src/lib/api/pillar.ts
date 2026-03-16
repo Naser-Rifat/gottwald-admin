@@ -1,5 +1,5 @@
-import type { Project, CreateProjectPayload, UpdateProjectPayload } from "../types/project";
-import { MOCK_PROJECTS } from "../mock/projects.mock";
+import type { CreatePillarPayload, Pillar, UpdatePillarPayload } from "../types/pillar";
+import { MOCK_PROJECTS } from "../mock/pillar.mock";
 
 const USE_MOCK = import.meta.env.VITE_DATA_SOURCE === "mock";
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -12,7 +12,7 @@ function getToken(): string | null {
 
 async function apiFetch<T>(
   endpoint: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<T> {
   const token = getToken();
 
@@ -24,7 +24,6 @@ async function apiFetch<T>(
     ...options,
   });
 
-  // If backend returns 401 — token expired or invalid
   if (res.status === 401) {
     localStorage.removeItem("gottwald_admin_token");
     localStorage.removeItem("gottwald_admin_user");
@@ -39,53 +38,55 @@ async function apiFetch<T>(
   return res.json();
 }
 
-// ─── GET ALL PROJECTS ─────────────────────────────────────────────────────────
+// ─── GET ALL PILLARS ─────────────────────────────────────────────────────────
 
-export async function getProjects(): Promise<Project[]> {
+export async function getPillars(): Promise<Pillar[]> {
   if (USE_MOCK) return MOCK_PROJECTS;
-  return apiFetch<Project[]>("/api/projects");
+  return apiFetch<Pillar[]>("/api/projects");
 }
 
-// ─── GET SINGLE PROJECT ───────────────────────────────────────────────────────
+// ─── GET SINGLE PILLAR ───────────────────────────────────────────────────────
 
-export async function getProject(slug: string): Promise<Project | undefined> {
+export async function getPillar(slug: string): Promise<Pillar | undefined> {
   if (USE_MOCK) return MOCK_PROJECTS.find((p) => p.slug === slug);
-  return apiFetch<Project>(`/api/projects/${slug}`);
+  return apiFetch<Pillar>(`/api/projects/${slug}`);
 }
 
-// ─── CREATE PROJECT ───────────────────────────────────────────────────────────
+// ─── CREATE PILLAR ───────────────────────────────────────────────────────────
 
-export async function createProject(data: CreateProjectPayload): Promise<Project> {
+export async function createPillar(
+  data: CreatePillarPayload,
+): Promise<Pillar> {
   if (USE_MOCK) {
     console.log("[MOCK] CREATE:", data);
     return data;
   }
-  return apiFetch<Project>("/api/projects", {
+  return apiFetch<Pillar>("/api/projects", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-// ─── UPDATE PROJECT ───────────────────────────────────────────────────────────
+// ─── UPDATE PILLAR ───────────────────────────────────────────────────────────
 
-export async function updateProject(
+export async function updatePillar(
   slug: string,
-  data: UpdateProjectPayload
-): Promise<Project> {
+  data: UpdatePillarPayload,
+): Promise<Pillar> {
   if (USE_MOCK) {
     console.log("[MOCK] UPDATE:", slug, data);
     const existing = MOCK_PROJECTS.find((p) => p.slug === slug)!;
     return { ...existing, ...data };
   }
-  return apiFetch<Project>(`/api/projects/${slug}`, {
+  return apiFetch<Pillar>(`/api/projects/${slug}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
 }
 
-// ─── DELETE PROJECT ───────────────────────────────────────────────────────────
+// ─── DELETE PILLAR ───────────────────────────────────────────────────────────
 
-export async function deleteProject(slug: string): Promise<void> {
+export async function deletePillar(slug: string): Promise<void> {
   if (USE_MOCK) {
     console.log("[MOCK] DELETE:", slug);
     return;
@@ -95,7 +96,7 @@ export async function deleteProject(slug: string): Promise<void> {
 
 // ─── UPLOAD IMAGE ─────────────────────────────────────────────────────────────
 
-export async function uploadProjectImage(file: File): Promise<string> {
+export async function uploadPillarImage(file: File): Promise<string> {
   if (USE_MOCK) {
     console.log("[MOCK] UPLOAD IMAGE:", file.name);
     return `/assets/projects/${file.name}`;

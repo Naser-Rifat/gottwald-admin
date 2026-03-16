@@ -8,6 +8,7 @@ import { X, Plus, Trash2, Loader2 } from "lucide-react";
 import type { Project, ContentBlock } from "../lib/types/project";
 import { createProject, updateProject, uploadProjectImage } from "../lib/api/projects";
 import ContentBlockBuilder from "./ContentBlockBuilder";
+import ProjectPreview from "./ProjectPreview";
 
 // ─── ZOD SCHEMA ──────────────────────────────────────────────────────────────
 
@@ -77,9 +78,16 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
     },
   });
 
+  const [showPreview, setShowPreview] = useState(false);
+
   const tags = watch("tags");
   const services = watch("services");
   const theme = watch("theme");
+  const watchedTitle = watch("title");
+  const watchedSlug = watch("slug");
+  const watchedDescription = watch("description");
+  const watchedDetails = watch("details");
+  const watchedLaunchUrl = watch("launchUrl");
 
   // ─── SLUG AUTO-GENERATE ──────────────────────────────────────────────────────
 
@@ -380,6 +388,24 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
       {/* Content Blocks */}
       <ContentBlockBuilder blocks={contentBlocks} onChange={setContentBlocks} />
+
+      {/* Live Preview */}
+      <ProjectPreview
+        data={{
+          title: watchedTitle,
+          slug: watchedSlug,
+          description: watchedDescription,
+          details: watchedDetails,
+          tags,
+          services,
+          image: imagePreview,
+          launchUrl: watchedLaunchUrl,
+          theme,
+          contentBlocks,
+        }}
+        visible={showPreview}
+        onToggle={() => setShowPreview((v) => !v)}
+      />
 
       {/* Submit */}
       <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import { login } from "../lib/api/auth";
 
@@ -66,11 +66,13 @@ export default function Login() {
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-2xl shadow-black/40">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-6 h-6 text-black" />
+           
+            <div className="w-12 h-12 flex items-center justify-center mx-auto mb-4">
+
+            <img  className="self-center" height={100}width={100}  src="/public/logo.png"  />
             </div>
             <h1 className="text-xl font-black tracking-wider text-[#C9A84C] uppercase">
-              GOTTWALD
+              GOTT WALD
             </h1>
             <p className="text-xs text-zinc-500 mt-1 tracking-widest uppercase">
               Admin Panel

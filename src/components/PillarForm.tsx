@@ -188,6 +188,8 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
         contentBlocks: uploadedBlocks,
       };
 
+ console.log("projectdata",projectData);
+
       if (mode === "create") {
         await createPillar(projectData);
         toast.success("Pillar created successfully!");

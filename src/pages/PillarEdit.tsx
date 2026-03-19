@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { getPillarById } from "../lib/api/pillar";
 import PillarForm from "../components/PillarForm";
@@ -12,18 +12,26 @@ export default function PillarEdit() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
+    if (!id) return;
+    let cancelled = false;
+    startTransition(() => {
+      setLoading(true);
+      setPillar(undefined);
+    });
     getPillarById(id)
       .then((data) => {
-        setPillar(data);
+        if (!cancelled) setPillar(data);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  if (loading) {
+  const isLoading = id ? loading : false;
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
@@ -31,7 +39,7 @@ export default function PillarEdit() {
     );
   }
 
-  if (!pillar) {
+  if (!id || !pillar) {
     return (
       <div className="text-center py-20">
         <h2 className="text-lg font-semibold text-zinc-300">

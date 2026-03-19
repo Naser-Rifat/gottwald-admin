@@ -42,7 +42,7 @@ async function apiFetch<T>(
 
 export async function getPillars(): Promise<Pillar[]> {
   if (USE_MOCK) return MOCK_PROJECTS;
-  return apiFetch<Pillar[]>("/api/projects");
+  return apiFetch<Pillar[]>("/api/pillars");
 }
 
 // ─── GET SINGLE PILLAR ───────────────────────────────────────────────────────
@@ -61,7 +61,7 @@ export async function createPillar(
     console.log("[MOCK] CREATE:", data);
     return data;
   }
-  return apiFetch<Pillar>("/api/projects", {
+  return apiFetch<Pillar>("/api/pillars", {
     method: "POST",
     body: JSON.stringify(data),
   });

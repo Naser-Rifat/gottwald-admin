@@ -1,7 +1,7 @@
-import type { ContentBlock, ProjectTheme } from "../lib/types/pillar";
+import type { ContentBlock, PillarTheme } from "../lib/types/pillar";
 import { Eye, EyeOff, ArrowLeft, ExternalLink } from "lucide-react";
 
-interface ProjectPreviewData {
+interface PillarPreviewData {
   title: string;
   slug: string;
   description: string;
@@ -10,12 +10,12 @@ interface ProjectPreviewData {
   services: string[];
   image: string;
   launchUrl: string;
-  theme: ProjectTheme;
+  theme: PillarTheme;
   contentBlocks: ContentBlock[];
 }
 
-interface ProjectPreviewProps {
-  data: ProjectPreviewData;
+interface PillarPreviewProps {
+  data: PillarPreviewData;
   visible: boolean;
   onToggle: () => void;
 }
@@ -24,7 +24,7 @@ export default function ProjectPreview({
   data,
   visible,
   onToggle,
-}: ProjectPreviewProps) {
+}: PillarPreviewProps) {
   const { theme, contentBlocks } = data;
   const bg = theme.background || "#121212";
   const txt = theme.text || "#F5F5F5";
@@ -105,7 +105,7 @@ function HeroPanel({
   txt,
   accent,
 }: {
-  data: ProjectPreviewData;
+  data: PillarPreviewData;
   bg: string;
   txt: string;
   accent: string;

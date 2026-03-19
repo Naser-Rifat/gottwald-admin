@@ -8,7 +8,7 @@ interface PillarCardProps {
   deleting: boolean;
 }
 
-export default function ProjectCard({
+export default function PillarCard({
   project,
   onEdit,
   onDelete,

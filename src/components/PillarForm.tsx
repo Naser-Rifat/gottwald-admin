@@ -12,11 +12,11 @@ import {
   uploadPillarImage,
 } from "../lib/api/pillar";
 import ContentBlockBuilder from "./ContentBlockBuilder";
-import ProjectPreview from "./PillarPreview";
+import PillarPreview from "./PillarPreview";
 
 // ─── ZOD SCHEMA ──────────────────────────────────────────────────────────────
 
-const projectSchema = z.object({
+const pillarSchema = z.object({
   title: z.string().min(2, "Title is required"),
   slug: z
     .string()
@@ -35,18 +35,18 @@ const projectSchema = z.object({
   image: z.string().optional(),
 });
 
-type ProjectFormValues = z.infer<typeof projectSchema>;
+type PillarFormValues = z.infer<typeof pillarSchema>;
 
 // ─── PROPS ───────────────────────────────────────────────────────────────────
 
-interface ProjectFormProps {
+interface PillarFormProps {
   mode: "create" | "edit";
   initialData?: Pillar;
 }
 
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
-export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
+export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -65,8 +65,8 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<ProjectFormValues>({
-    resolver: zodResolver(projectSchema),
+  } = useForm<PillarFormValues>({
+    resolver: zodResolver(pillarSchema),
     defaultValues: {
       title: initialData?.title || "",
       slug: initialData?.slug || "",
@@ -161,7 +161,7 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
   // ─── SUBMIT ──────────────────────────────────────────────────────────────────
 
-  const onSubmit = async (data: ProjectFormValues) => {
+  const onSubmit = async (data: PillarFormValues) => {
     setSubmitting(true);
     try {
       let imageUrl = data.image || "";
@@ -174,31 +174,33 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
         contentBlocks.map(async (block) => {
           if (block._imageFile) {
             const url = await uploadPillarImage(block._imageFile);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { _imageFile: _, ...rest } = block;
             return { ...rest, image: url };
           }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { _imageFile: _, ...rest } = block;
           return rest;
         }),
       );
 
-      const projectData: Pillar = {
+      const pillarData: Pillar = {
         ...data,
         image: imageUrl,
         contentBlocks: uploadedBlocks,
       };
 
- console.log("projectdata",projectData);
+ console.log("pillarData",data);
 
       if (mode === "create") {
-        await createPillar(projectData);
+        await createPillar(pillarData);
         toast.success("Pillar created successfully!");
       } else {
-        await updatePillar(data.slug, projectData);
+        await updatePillar(data.slug, pillarData);
         toast.success("Pillar updated successfully!");
       }
 
-      navigate("/projects");
+      navigate("/pillars");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -470,7 +472,7 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
       <ContentBlockBuilder blocks={contentBlocks} onChange={setContentBlocks} />
 
       {/* Live Preview */}
-      <ProjectPreview
+      <PillarPreview
         data={{
           title: watchedTitle,
           slug: watchedSlug,
@@ -499,7 +501,7 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => navigate("/projects")}
+          onClick={() => navigate("/pillars")}
           className="px-6 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
         >
           Cancel

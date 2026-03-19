@@ -192,8 +192,8 @@ async function doFetch<T>(
         const result = await refreshAccessToken(refresh);
         updateTokens(result.accessToken, result.refreshToken);
         res = await fetch(`${BASE_URL}${endpoint}`, {
-          headers: getHeaders(useJson),
           ...options,
+          headers: getHeaders(useJson),
         });
       } catch {
         clearSession();

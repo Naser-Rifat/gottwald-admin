@@ -14,7 +14,7 @@ import RichTextEditor from "./RichTextEditor";
 
 interface ContentBlockBuilderProps {
   blocks: ContentBlock[];
-  onChange: (blocks: ContentBlock[]) => void;
+  onChange: (updater: (prev: ContentBlock[]) => ContentBlock[]) => void;
 }
 
 export default function ContentBlockBuilder({
@@ -32,26 +32,27 @@ export default function ContentBlockBuilder({
       body: "",
       image: "",
     };
-    onChange([...blocks, newBlock]);
+    onChange((prev) => [...prev, newBlock]);
   };
 
   const updateBlock = (index: number, updates: Partial<ContentBlock>) => {
-    const updated = blocks.map((b, i) =>
-      i === index ? { ...b, ...updates } : b,
+    onChange((prev) =>
+      prev.map((b, i) => (i === index ? { ...b, ...updates } : b)),
     );
-    onChange(updated);
   };
 
   const removeBlock = (index: number) => {
-    onChange(blocks.filter((_, i) => i !== index));
+    onChange((prev) => prev.filter((_, i) => i !== index));
   };
 
   const moveBlock = (index: number, direction: "up" | "down") => {
-    const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= blocks.length) return;
-    const updated = [...blocks];
-    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-    onChange(updated);
+    onChange((prev) => {
+      const newIndex = direction === "up" ? index - 1 : index + 1;
+      if (newIndex < 0 || newIndex >= prev.length) return prev;
+      const updated = [...prev];
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return updated;
+    });
   };
 
   const handleImageSelect = (index: number, file: File) => {
@@ -66,7 +67,7 @@ export default function ContentBlockBuilder({
   };
 
   const clearImage = (index: number) => {
-    updateBlock(index, { image: "" });
+    updateBlock(index, { image: "", _imageFile: undefined });
   };
 
   return (
@@ -184,12 +185,17 @@ export default function ContentBlockBuilder({
               <input
                 ref={(el) => {
                   if (el) fileInputRefs.current.set(block.id, el);
+                  else fileInputRefs.current.delete(block.id);
                 }}
                 type="file"
+                name={`content_block_${block.id}_image`}
                 accept="image/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) handleImageSelect(index, file);
+                  if (file) {
+                    handleImageSelect(index, file);
+                    e.target.value = "";
+                  }
                 }}
                 className="hidden"
               />

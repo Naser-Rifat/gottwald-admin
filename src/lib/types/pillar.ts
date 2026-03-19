@@ -8,6 +8,7 @@ export interface ContentBlock {
   body?: string;
   image?: string;
   videoUrl?: string;
+  created_at?: string;
   /** Transient — carries the File for upload, never sent to the API */
   _imageFile?: File;
 }
@@ -19,6 +20,7 @@ export interface PillarTheme {
 }
 
 export interface Pillar {
+  id?: string;
   slug: string;
   title: string;
   tags: string[];

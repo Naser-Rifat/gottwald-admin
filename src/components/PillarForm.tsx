@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,11 +6,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { X, Plus, Trash2, Loader2 } from "lucide-react";
 import type { Pillar, ContentBlock } from "../lib/types/pillar";
-import {
-  createPillar,
-  updatePillar,
-  uploadPillarImage,
-} from "../lib/api/pillar";
+import { createPillar, updatePillar } from "../lib/api/pillar";
 import ContentBlockBuilder from "./ContentBlockBuilder";
 import PillarPreview from "./PillarPreview";
 
@@ -86,6 +82,11 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
 
   const [showPreview, setShowPreview] = useState(false);
 
+  const handleBlocksChange = useCallback(
+    (fn: (prev: ContentBlock[]) => ContentBlock[]) => setContentBlocks(fn),
+    []
+  );
+
   const tags = watch("tags");
   const services = watch("services");
   const theme = watch("theme");
@@ -157,6 +158,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
       reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
+    e.target.value = "";
   };
 
   // ─── SUBMIT ──────────────────────────────────────────────────────────────────
@@ -164,43 +166,27 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const onSubmit = async (data: PillarFormValues) => {
     setSubmitting(true);
     try {
-      let imageUrl = data.image || "";
-
-      if (imageFile) {
-        imageUrl = await uploadPillarImage(imageFile);
-      }
-
-      const uploadedBlocks = await Promise.all(
-        contentBlocks.map(async (block) => {
-          if (block._imageFile) {
-            const url = await uploadPillarImage(block._imageFile);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { _imageFile: _, ...rest } = block;
-            return { ...rest, image: url };
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { _imageFile: _, ...rest } = block;
-          return rest;
-        }),
-      );
+      const imageUrl = imageFile
+        ? ""
+        : (data.image || initialData?.image || "");
 
       const pillarData: Pillar = {
         ...data,
         image: imageUrl,
-        contentBlocks: uploadedBlocks,
+        contentBlocks,
       };
 
- console.log("pillarData",data);
-
       if (mode === "create") {
-        await createPillar(pillarData);
+        await createPillar(pillarData, imageFile);
         toast.success("Pillar created successfully!");
       } else {
-        await updatePillar(data.slug, pillarData);
+        const id = initialData?.id ?? data.slug;
+        if (!id) throw new Error("Pillar id required for update");
+        await updatePillar(id, pillarData, imageFile);
         toast.success("Pillar updated successfully!");
       }
 
-      navigate("/pillars");
+      navigate("/projects");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -292,6 +278,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          name="cover_image"
           onChange={handleImageSelect}
           className="hidden"
         />
@@ -469,7 +456,10 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
       </div>
 
       {/* Content Blocks */}
-      <ContentBlockBuilder blocks={contentBlocks} onChange={setContentBlocks} />
+      <ContentBlockBuilder
+        blocks={contentBlocks}
+        onChange={handleBlocksChange}
+      />
 
       {/* Live Preview */}
       <PillarPreview
@@ -501,7 +491,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => navigate("/pillars")}
+          onClick={() => navigate("/projects")}
           className="px-6 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
         >
           Cancel

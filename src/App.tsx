@@ -35,7 +35,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/projects" replace />} />
             <Route path="/projects" element={<PillarsList />} />
             <Route path="/projects/new" element={<PillarNew />} />
-            <Route path="/projects/:slug" element={<PillarEdit />} />
+            <Route path="/projects/:id" element={<PillarEdit />} />
           </Route>
         </Route>
       </Routes>

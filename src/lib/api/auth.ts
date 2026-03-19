@@ -26,9 +26,12 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
   });
 
   if (!res.ok) {
-    const error = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    const error = (await res.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
     throw new Error(
-      (error.detail as string) ?? (error.message as string) ?? "Login failed"
+      (error.detail as string) ?? (error.message as string) ?? "Login failed",
     );
   }
 
@@ -37,14 +40,12 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
   const tokens = data.tokens as Record<string, unknown> | undefined;
   const token =
     (tokens?.access as string) ??
-    (tokens?.accessToken as string) ??
-    (data.token as string) ??
     (data.access as string) ??
-    (data.access_token as string);
+    (data.token as string);
   if (!token) throw new Error("Invalid response: no token received");
   const refreshToken =
     (tokens?.refresh as string) ??
-    (tokens?.refreshToken as string) ??
+    (data.refresh as string) ??
     (data.refresh_token as string);
   const rawUser = data.user ?? data;
   const user = {
@@ -53,7 +54,7 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
     name: String(
       (rawUser as { name?: string }).name ??
         (rawUser as { username?: string }).username ??
-        "Admin"
+        "Admin",
     ),
   };
   return { token, refreshToken, user };
@@ -67,7 +68,7 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
 let refreshLock: Promise<RefreshedTokens> | null = null;
 
 export async function refreshAccessToken(
-  refreshToken: string
+  refreshToken: string,
 ): Promise<RefreshedTokens> {
   if (refreshLock) return refreshLock;
 
@@ -79,9 +80,14 @@ export async function refreshAccessToken(
     });
 
     if (!res.ok) {
-      const err = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      const err = (await res.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
       throw new Error(
-        (err.detail as string) ?? (err.message as string) ?? "Token refresh failed"
+        (err.detail as string) ??
+          (err.message as string) ??
+          "Token refresh failed",
       );
     }
 
@@ -90,17 +96,15 @@ export async function refreshAccessToken(
     const tokens = data.tokens as Record<string, unknown> | undefined;
     const accessToken =
       (tokens?.access as string) ??
-      (tokens?.accessToken as string) ??
       (data.access as string) ??
-      (data.access_token as string) ??
       (data.token as string);
     const newRefresh =
       (tokens?.refresh as string) ??
-      (tokens?.refreshToken as string) ??
       (data.refresh as string) ??
       (data.refresh_token as string);
 
-    if (!accessToken) throw new Error("Invalid refresh response: no access token");
+    if (!accessToken)
+      throw new Error("Invalid refresh response: no access token");
     return { accessToken, refreshToken: newRefresh };
   })();
 
@@ -112,12 +116,10 @@ export async function refreshAccessToken(
 }
 
 /** Persist new tokens after refresh. */
-export function updateTokens(
-  accessToken: string,
-  refreshToken?: string
-): void {
+export function updateTokens(accessToken: string, refreshToken?: string): void {
   localStorage.setItem(STORAGE_KEYS.token, accessToken);
-  if (refreshToken) localStorage.setItem(STORAGE_KEYS.refreshToken, refreshToken);
+  if (refreshToken)
+    localStorage.setItem(STORAGE_KEYS.refreshToken, refreshToken);
 }
 
 /** Clear all auth storage (e.g. after refresh failed or explicit logout). */

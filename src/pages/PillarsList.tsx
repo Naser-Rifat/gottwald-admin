@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import type { Pillar } from "../lib/types/pillar";
 import { getPillars, deletePillar } from "../lib/api/pillar";
-import ProjectCard from "../components/PillarCard";
+import PillarCard from "../components/PillarCard";
 import { toast } from "sonner";
 
 export default function PillarsList() {
   const navigate = useNavigate();
   const [pillars, setPillars] = useState<Pillar[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,22 +29,22 @@ export default function PillarsList() {
     }
   };
 
-  const handleDelete = async (slug: string) => {
-    if (confirmDelete !== slug) {
-      setConfirmDelete(slug);
+  const handleDelete = async (id: string) => {
+    if (confirmDelete !== id) {
+      setConfirmDelete(id);
       return;
     }
 
-    setDeletingSlug(slug);
+    setDeletingId(id);
     try {
-      await deletePillar(slug);
+      await deletePillar(id);
       toast.success("Pillar deleted");
-      setPillars((prev) => prev.filter((p) => p.slug !== slug));
+      setPillars((prev) => prev.filter((p) => (p.id ?? p.slug) !== id));
     } catch (err) {
       toast.error("Failed to delete pillar");
       console.error(err);
     } finally {
-      setDeletingSlug(null);
+      setDeletingId(null);
       setConfirmDelete(null);
     }
   };
@@ -117,15 +117,15 @@ export default function PillarsList() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pillars.map((pillar) => (
-            <div key={pillar.slug} className="relative">
-              <ProjectCard
-                project={pillar}
-                onEdit={(slug) => navigate(`/projects/${slug}`)}
+            <div key={pillar.id ?? pillar.slug} className="relative">
+              <PillarCard
+                pillar={pillar}
+                onEdit={(id) => navigate(`/projects/${id}`)}
                 onDelete={handleDelete}
-                deleting={deletingSlug === pillar.slug}
+                deleting={deletingId === (pillar.id ?? pillar.slug)}
               />
               {/* Confirm Delete Overlay */}
-              {confirmDelete === pillar.slug && (
+              {confirmDelete === (pillar.id ?? pillar.slug) && (
                 <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 z-10">
                   <p className="text-sm font-medium text-zinc-200">
                     Delete this pillar?
@@ -135,11 +135,11 @@ export default function PillarsList() {
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <button
-                      onClick={() => handleDelete(pillar.slug)}
-                      disabled={deletingSlug === pillar.slug}
+                      onClick={() => handleDelete(pillar.id ?? pillar.slug)}
+                      disabled={deletingId === (pillar.id ?? pillar.slug)}
                       className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-500 disabled:opacity-50 transition-colors"
                     >
-                      {deletingSlug === pillar.slug && (
+                      {deletingId === (pillar.id ?? pillar.slug) && (
                         <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       )}
                       Confirm Delete

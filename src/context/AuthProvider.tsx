@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import type { AuthUser } from "../lib/types/auth";
 import { logout as apiLogout, clearSession, STORAGE_KEYS } from "../lib/api/auth";
 import { AuthContext } from "./auth-context";

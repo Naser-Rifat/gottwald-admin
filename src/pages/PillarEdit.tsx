@@ -1,23 +1,27 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { getPillar } from "../lib/api/pillar";
+import { getPillarById } from "../lib/api/pillar";
 import PillarForm from "../components/PillarForm";
 import type { Pillar } from "../lib/types/pillar";
 
 export default function PillarEdit() {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [pillar, setPillar] = useState<Pillar | undefined>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!slug) return;
-    getPillar(slug).then((data) => {
-      setPillar(data);
+    if (!id) {
       setLoading(false);
-    });
-  }, [slug]);
+      return;
+    }
+    getPillarById(id)
+      .then((data) => {
+        setPillar(data);
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
 
   if (loading) {
     return (
@@ -34,7 +38,7 @@ export default function PillarEdit() {
           Pillar not found
         </h2>
         <p className="text-sm text-zinc-500 mt-1 mb-6">
-          The pillar with slug &ldquo;{slug}&rdquo; does not exist.
+          The pillar does not exist.
         </p>
         <button
           onClick={() => navigate("/projects")}

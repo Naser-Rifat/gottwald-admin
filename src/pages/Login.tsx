@@ -40,7 +40,7 @@ export default function Login() {
 
     try {
       const response = await login(data);
-      setAuth(response.token, response.user);
+      setAuth(response.token, response.user, response.refreshToken);
       navigate("/projects", { replace: true });
     } catch (err) {
       if (err instanceof Error) {
@@ -69,7 +69,13 @@ export default function Login() {
            
             <div className="w-12 h-12 flex items-center justify-center mx-auto mb-4">
 
-            <img  className="self-center" height={100}width={100}  src="/public/logo.png"  />
+            <img
+                className="mx-auto"
+                height={100}
+                width={100}
+                src="/logo.png"
+                alt="GOTT WALD"
+              />
             </div>
             <h1 className="text-xl font-black tracking-wider text-[#C9A84C] uppercase">
               GOTT WALD

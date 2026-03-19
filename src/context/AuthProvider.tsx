@@ -1,13 +1,13 @@
 import { useState, type ReactNode } from "react";
 import type { AuthUser } from "../lib/types/auth";
-import { logout as apiLogout } from "../lib/api/auth";
+import { logout as apiLogout, clearSession, STORAGE_KEYS } from "../lib/api/auth";
 import { AuthContext } from "./auth-context";
 
-const TOKEN_KEY = "gottwald_admin_token";
-const USER_KEY = "gottwald_admin_user";
+const TOKEN_KEY = STORAGE_KEYS.token;
+const REFRESH_KEY = STORAGE_KEYS.refreshToken;
+const USER_KEY = STORAGE_KEYS.user;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Lazy initializers — read from localStorage synchronously on first render
   const [token, setToken] = useState<string | null>(
     () => localStorage.getItem(TOKEN_KEY)
   );
@@ -18,6 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return JSON.parse(stored);
       } catch {
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(REFRESH_KEY);
         localStorage.removeItem(USER_KEY);
         return null;
       }
@@ -26,19 +27,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const isLoading = false;
 
-  const setAuth = (newToken: string, newUser: AuthUser) => {
+  const setAuth = (newToken: string, newUser: AuthUser, refreshToken?: string) => {
     setToken(newToken);
     setUser(newUser);
     localStorage.setItem(TOKEN_KEY, newToken);
     localStorage.setItem(USER_KEY, JSON.stringify(newUser));
+    if (refreshToken) {
+      localStorage.setItem(REFRESH_KEY, refreshToken);
+    } else {
+      localStorage.removeItem(REFRESH_KEY);
+    }
   };
 
   const logout = async () => {
-    if (token) await apiLogout(token);
+    const refreshToken = localStorage.getItem(REFRESH_KEY);
+    await apiLogout(refreshToken);
+    clearSession();
     setToken(null);
     setUser(null);
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
   };
 
   return (

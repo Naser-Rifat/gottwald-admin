@@ -1,22 +1,20 @@
 import type { CreatePillarPayload, Pillar, UpdatePillarPayload } from "../types/pillar";
 import { MOCK_PROJECTS } from "../mock/pillar.mock";
+import { refreshAccessToken, clearSession, updateTokens, STORAGE_KEYS } from "./auth";
 
 const USE_MOCK = import.meta.env.VITE_DATA_SOURCE === "mock";
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:80";
 
-// ─── HELPER ──────────────────────────────────────────────────────────────────
-
-function getToken(): string | null {
-  return localStorage.getItem("gottwald_admin_token");
+function getToken() {
+  return localStorage.getItem(STORAGE_KEYS.token);
 }
 
 async function apiFetch<T>(
   endpoint: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<T> {
-  const token = getToken();
-
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  let token = getToken();
+  let res = await fetch(`${BASE_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -25,10 +23,30 @@ async function apiFetch<T>(
   });
 
   if (res.status === 401) {
-    localStorage.removeItem("gottwald_admin_token");
-    localStorage.removeItem("gottwald_admin_user");
-    window.location.href = "/login";
-    throw new Error("Session expired. Please log in again.");
+    const refresh = localStorage.getItem(STORAGE_KEYS.refreshToken);
+    if (refresh) {
+      try {
+        const result = await refreshAccessToken(refresh);
+        updateTokens(result.accessToken, result.refreshToken);
+        token = getToken();
+        res = await fetch(`${BASE_URL}${endpoint}`, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          ...options,
+        });
+      } catch {
+        clearSession();
+        window.location.href = "/login";
+        throw new Error("Session expired.");
+      }
+    }
+    if (res.status === 401) {
+      clearSession();
+      window.location.href = "/login";
+      throw new Error("Session expired.");
+    }
   }
 
   if (!res.ok) {

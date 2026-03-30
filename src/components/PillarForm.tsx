@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import type { Pillar, ContentBlock } from "../lib/types/pillar";
 import { createPillar, updatePillar } from "../lib/api/pillar";
+import { ApiError } from "../lib/api/error";
 import { validateImage, DEFAULT_IMAGE_CONFIG } from "../lib/utils/image-validation";
 import ContentBlockBuilder from "./ContentBlockBuilder";
 import PillarPreview from "./PillarPreview";
@@ -56,6 +57,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>(
     initialData?.contentBlocks || [],
   );
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -63,6 +65,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
     handleSubmit,
     setValue,
     watch,
+    setError,
     formState: { errors },
   } = useForm<PillarFormValues>({
     resolver: zodResolver(pillarSchema),
@@ -104,7 +107,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
     setValue("title", title);
-    if (mode === "create") {
+    if (mode === "create" && !isSlugManuallyEdited) {
       const slug = title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
@@ -204,7 +207,19 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
 
       navigate("/projects");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      if (err instanceof ApiError && err.data) {
+        Object.entries(err.data).forEach(([key, messages]) => {
+          const message = Array.isArray(messages) ? messages[0] : messages;
+          if (["title", "slug", "description", "details", "launchUrl", "tags", "services", "theme", "image"].includes(key)) {
+            setError(key as keyof PillarFormValues, { type: "server", message: String(message) });
+          } else if (key !== "detail" && key !== "message") {
+            toast.error(`${key}: ${message}`);
+          }
+        });
+        toast.error(err.message || "Please fix the validation errors below.");
+      } else {
+        toast.error(err instanceof Error ? err.message : "Something went wrong");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -236,6 +251,10 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           </label>
           <input
             {...register("slug")}
+            onChange={(e) => {
+              setValue("slug", e.target.value, { shouldValidate: true, shouldDirty: true });
+              setIsSlugManuallyEdited(true);
+            }}
             placeholder="pillar-slug"
             className="w-full px-3 py-2.5 rounded-lg bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors font-mono"
           />

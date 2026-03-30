@@ -1,6 +1,7 @@
 import type { ContentBlock, CreatePillarPayload, Pillar, PillarTheme, UpdatePillarPayload } from "../types/pillar";
 import { MOCK_PROJECTS } from "../mock/pillar.mock";
 import { refreshAccessToken, clearSession, updateTokens, STORAGE_KEYS } from "./auth";
+import { ApiError } from "./error";
 
 const USE_MOCK = import.meta.env.VITE_DATA_SOURCE === "mock";
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:80";
@@ -197,20 +198,26 @@ async function doFetch<T>(
         });
       } catch {
         clearSession();
-        window.location.href = "/login";
+        window.dispatchEvent(new Event("auth:unauthorized"));
         throw new Error("Session expired.");
       }
     }
     if (res.status === 401) {
       clearSession();
-      window.location.href = "/login";
+      window.dispatchEvent(new Event("auth:unauthorized"));
       throw new Error("Session expired.");
     }
   }
 
   if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`API Error ${res.status}: ${error}`);
+    const errorText = await res.text();
+    try {
+      const json = JSON.parse(errorText);
+      throw new ApiError(json.detail || json.message || "Request failed", res.status, json);
+    } catch (e) {
+      if (e instanceof ApiError) throw e;
+      throw new ApiError(`API Error: ${errorText}`, res.status);
+    }
   }
   if (res.status === 204) return undefined as T;
   return res.json();

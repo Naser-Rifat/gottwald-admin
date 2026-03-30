@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import type { ContentBlock } from "../lib/types/pillar";
 import {
   Trash2,
@@ -9,7 +10,9 @@ import {
   Moon,
   ImagePlus,
   X,
+  AlertTriangle,
 } from "lucide-react";
+import { validateImage, DEFAULT_IMAGE_CONFIG } from "../lib/utils/image-validation";
 import RichTextEditor from "./RichTextEditor";
 
 interface ContentBlockBuilderProps {
@@ -22,6 +25,20 @@ export default function ContentBlockBuilder({
   onChange,
 }: ContentBlockBuilderProps) {
   const fileInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
+  const [blockImageErrors, setBlockImageErrors] = useState<Record<string, string>>({});
+  const [validatingBlocks, setValidatingBlocks] = useState<Record<string, boolean>>({});
+
+  const setBlockError = (blockId: string, error: string) => {
+    setBlockImageErrors((prev) => ({ ...prev, [blockId]: error }));
+  };
+
+  const clearBlockError = (blockId: string) => {
+    setBlockImageErrors((prev) => {
+      const next = { ...prev };
+      delete next[blockId];
+      return next;
+    });
+  };
 
   const addBlock = () => {
     const newBlock: ContentBlock = {
@@ -55,7 +72,20 @@ export default function ContentBlockBuilder({
     });
   };
 
-  const handleImageSelect = (index: number, file: File) => {
+  const handleImageSelect = async (index: number, file: File, blockId: string) => {
+    clearBlockError(blockId);
+    setValidatingBlocks((prev) => ({ ...prev, [blockId]: true }));
+
+    const result = await validateImage(file);
+
+    setValidatingBlocks((prev) => ({ ...prev, [blockId]: false }));
+
+    if (!result.valid) {
+      setBlockError(blockId, result.error || "Invalid image.");
+      toast.error(result.error || "Invalid image.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       updateBlock(index, {
@@ -66,7 +96,8 @@ export default function ContentBlockBuilder({
     reader.readAsDataURL(file);
   };
 
-  const clearImage = (index: number) => {
+  const clearImage = (index: number, blockId: string) => {
+    clearBlockError(blockId);
     updateBlock(index, { image: "", _imageFile: undefined });
   };
 
@@ -189,11 +220,11 @@ export default function ContentBlockBuilder({
                 }}
                 type="file"
                 name={`content_block_${block.id}_image`}
-                accept="image/*"
+                accept={DEFAULT_IMAGE_CONFIG.allowedTypes.join(",")}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    handleImageSelect(index, file);
+                    handleImageSelect(index, file, block.id);
                     e.target.value = "";
                   }
                 }}
@@ -210,7 +241,7 @@ export default function ContentBlockBuilder({
                     />
                     <button
                       type="button"
-                      onClick={() => clearImage(index)}
+                      onClick={() => clearImage(index, block.id)}
                       className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
                     >
                       <X className="w-3 h-3" />
@@ -219,20 +250,31 @@ export default function ContentBlockBuilder({
                   <button
                     type="button"
                     onClick={() => fileInputRefs.current.get(block.id)?.click()}
-                    className="px-3 py-2 rounded-lg border border-dashed border-zinc-700 text-xs text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+                    disabled={!!validatingBlocks[block.id]}
+                    className="px-3 py-2 rounded-lg border border-dashed border-zinc-700 text-xs text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-50"
                   >
-                    Change
+                    {validatingBlocks[block.id] ? "Validating..." : "Change"}
                   </button>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={() => fileInputRefs.current.get(block.id)?.click()}
-                  className="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-dashed border-zinc-700 text-sm text-zinc-500 hover:text-zinc-300 hover:border-zinc-500 transition-colors"
+                  disabled={!!validatingBlocks[block.id]}
+                  className="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-dashed border-zinc-700 text-sm text-zinc-500 hover:text-zinc-300 hover:border-zinc-500 transition-colors disabled:opacity-50"
                 >
                   <ImagePlus className="w-4 h-4" />
-                  Upload Image
+                  {validatingBlocks[block.id] ? "Validating..." : "Upload Image"}
                 </button>
+              )}
+              <p className="text-[10px] text-zinc-600 mt-1">
+                JPEG, PNG, WebP, AVIF, GIF · Max {DEFAULT_IMAGE_CONFIG.maxSizeLabel}
+              </p>
+              {blockImageErrors[block.id] && (
+                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-red-400">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{blockImageErrors[block.id]}</span>
+                </div>
               )}
             </div>
           </div>

@@ -4,9 +4,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { X, Plus, Trash2, Loader2 } from "lucide-react";
+import { X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import type { Pillar, ContentBlock } from "../lib/types/pillar";
 import { createPillar, updatePillar } from "../lib/api/pillar";
+import { validateImage, DEFAULT_IMAGE_CONFIG } from "../lib/utils/image-validation";
 import ContentBlockBuilder from "./ContentBlockBuilder";
 import PillarPreview from "./PillarPreview";
 
@@ -49,6 +50,8 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const [imagePreview, setImagePreview] = useState<string>(
     initialData?.image || "",
   );
+  const [imageError, setImageError] = useState<string>("");
+  const [imageValidating, setImageValidating] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>(
     initialData?.contentBlocks || [],
@@ -150,15 +153,28 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
 
   // ─── IMAGE ───────────────────────────────────────────────────────────────────
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
     e.target.value = "";
+    if (!file) return;
+
+    setImageError("");
+    setImageValidating(true);
+
+    const result = await validateImage(file);
+
+    setImageValidating(false);
+
+    if (!result.valid) {
+      setImageError(result.error || "Invalid image.");
+      toast.error(result.error || "Invalid image.");
+      return;
+    }
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   // ─── SUBMIT ──────────────────────────────────────────────────────────────────
@@ -277,7 +293,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept={DEFAULT_IMAGE_CONFIG.allowedTypes.join(",")}
           name="cover_image"
           onChange={handleImageSelect}
           className="hidden"
@@ -295,6 +311,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
                 onClick={() => {
                   setImageFile(null);
                   setImagePreview("");
+                  setImageError("");
                   setValue("image", "");
                 }}
                 className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-black/80"
@@ -303,14 +320,30 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
               </button>
             </div>
           ) : null}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2.5 rounded-lg border border-dashed border-zinc-700 text-sm text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
-          >
-            {imagePreview ? "Change Image" : "Upload Image"}
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={imageValidating}
+              className="px-4 py-2.5 rounded-lg border border-dashed border-zinc-700 text-sm text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+            >
+              {imageValidating
+                ? "Validating..."
+                : imagePreview
+                  ? "Change Image"
+                  : "Upload Image"}
+            </button>
+            <p className="text-[10px] text-zinc-600">
+              JPEG, PNG, WebP, AVIF, GIF · Max {DEFAULT_IMAGE_CONFIG.maxSizeLabel}
+            </p>
+          </div>
         </div>
+        {imageError && (
+          <div className="flex items-center gap-1.5 mt-2 text-xs text-red-400">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span>{imageError}</span>
+          </div>
+        )}
       </div>
 
       {/* Launch URL */}

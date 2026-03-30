@@ -286,23 +286,4 @@ export async function deletePillar(id: string): Promise<void> {
   await apiFetch<void>(`/api/v1/pillars/${id}/`, { method: "DELETE" });
 }
 
-// ─── UPLOAD IMAGE ─────────────────────────────────────────────────────────────
 
-export async function uploadPillarImage(file: File): Promise<string> {
-  if (USE_MOCK) {
-    return `/assets/pillar/${file.name}`;
-  }
-  const token = getToken();
-  const formData = new FormData();
-  formData.append("image", file);
-  const res = await fetch(`${BASE_URL}/api/v1/pillars/upload-image/`, {
-    method: "POST",
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: formData,
-  });
-  if (!res.ok) throw new Error(`Image upload failed: ${res.status}`);
-  const result = await res.json();
-  return result.url as string;
-}

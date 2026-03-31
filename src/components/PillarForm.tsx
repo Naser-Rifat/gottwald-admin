@@ -138,7 +138,7 @@ const pillarSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Lowercase letters and hyphens only"),
   description: z.string().min(1, "Description is required").max(DESCRIPTION_MAX, `Max ${DESCRIPTION_MAX} characters`),
   details: z.string().min(1, "Details are required"),
-  launchUrl: z.string().url("Must be a valid URL"),
+  launchUrl: z.string().url("Must be a valid URL").or(z.literal("")),
   tags: z.array(z.string()).min(1, "Add at least one tag"),
   services: z.array(z.string()).min(1, "Add at least one service"),
   theme: z.object({

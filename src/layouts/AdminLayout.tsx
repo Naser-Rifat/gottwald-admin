@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
+import ConfirmModal from "../components/ConfirmModal";
 import { useAuth } from "../context/useAuth";
 import { LogOut, Loader2 } from "lucide-react";
 
@@ -8,14 +9,16 @@ export default function AdminLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogoutConfirm = async () => {
     setLoggingOut(true);
     try {
       await logout();
-      navigate("/login");
+      navigate("/login", { replace: true });
     } finally {
       setLoggingOut(false);
+      setShowLogoutModal(false);
     }
   };
 
@@ -34,9 +37,9 @@ export default function AdminLayout() {
             </div>
           )}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutModal(true)}
             disabled={loggingOut}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 transition-colors disabled:opacity-50"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-red-950/20 transition-colors disabled:opacity-50"
           >
             {loggingOut ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -62,6 +65,19 @@ export default function AdminLayout() {
           </Suspense>
         </div>
       </main>
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        open={showLogoutModal}
+        title="Sign out?"
+        description="You'll be returned to the login screen. Any unsaved changes will be lost."
+        confirmLabel="Sign out"
+        cancelLabel="Stay"
+        variant="danger"
+        loading={loggingOut}
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setShowLogoutModal(false)}
+      />
     </div>
   );
 }

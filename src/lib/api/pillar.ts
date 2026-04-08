@@ -236,7 +236,7 @@ async function apiFetchForm<T>(endpoint: string, method: string, body: FormData)
 export async function getPillars(): Promise<Pillar[]> {
   if (USE_MOCK) return MOCK_PROJECTS;
   const res = await apiFetch<PillarsListResponse>("/api/v1/pillars/");
-  const items = res.data ?? [];
+  const items = res.data.reverse() ?? [];
   return items.map(mapApiPillarToPillar);
 }
 

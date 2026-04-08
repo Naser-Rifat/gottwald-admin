@@ -43,11 +43,11 @@ export default function PillarCard({
 
       {/* Content */}
       <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-semibold text-zinc-100 leading-tight">
+        <div className="flex flex-col gap-2 items-start w-full">
+          <h3 className="text-sm font-semibold text-zinc-100 leading-tight line-clamp-2">
             {pillar.title}
           </h3>
-          <span className="shrink-0 px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-zinc-400">
+          <span className="max-w-full truncate px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-zinc-400">
             {pillar.slug}
           </span>
         </div>

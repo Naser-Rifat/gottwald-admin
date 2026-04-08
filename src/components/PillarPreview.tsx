@@ -129,7 +129,8 @@ export default function PillarPreview({
 // ═══════════════════════════════════════════════════════════════════════
 
 /** Exact copy of ImageFallback from PillarDetailClient */
-function ImageFallback({ idx }: { idx: number }) {
+function ImageFallback({ idx = 0 }: { idx?: number }) {
+  const safeIdx = typeof idx === "number" && !isNaN(idx) ? idx : 0;
   return (
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
       <div
@@ -168,7 +169,7 @@ function ImageFallback({ idx }: { idx: number }) {
             color: TXT_LIGHT,
           }}
         >
-          {String(idx + 1).padStart(2, "0")}
+          {String(safeIdx + 1).padStart(2, "0")}
         </span>
       </div>
       <div
@@ -185,14 +186,15 @@ function ImageFallback({ idx }: { idx: number }) {
 
 /** Exact copy of SectionLabel from PillarDetailClient */
 function SectionLabel({
-  idx,
+  idx = 0,
   text,
   light,
 }: {
-  idx: number;
+  idx?: number;
   text: string;
   light?: boolean;
 }) {
+  const safeIdx = typeof idx === "number" && !isNaN(idx) ? idx : 0;
   return (
     <div
       style={{
@@ -221,7 +223,7 @@ function SectionLabel({
           color: light ? TXT_DARK_MUTED : TXT_MUTED,
         }}
       >
-        {String(idx + 1).padStart(2, "0")} — {text}
+        {String(safeIdx + 1).padStart(2, "0")} — {text || "Detail"}
       </span>
     </div>
   );
@@ -229,14 +231,16 @@ function SectionLabel({
 
 /** Panel counter — "01 / 03" bottom right, matching PillarDetailClient */
 function PanelCounter({
-  idx,
-  total,
+  idx = 0,
+  total = 1,
   light,
 }: {
-  idx: number;
-  total: number;
+  idx?: number;
+  total?: number;
   light?: boolean;
 }) {
+  const safeIdx = typeof idx === "number" && !isNaN(idx) ? idx : 0;
+  const safeTotal = typeof total === "number" && !isNaN(total) ? total : 1;
   return (
     <div
       style={{
@@ -253,9 +257,9 @@ function PanelCounter({
         gap: "4px",
       }}
     >
-      <span style={{ color: GOLD }}>{String(idx + 1).padStart(2, "0")}</span>
+      <span style={{ color: GOLD }}>{String(safeIdx + 1).padStart(2, "0")}</span>
       <span style={{ opacity: 0.3, margin: "0 2px" }}>/</span>
-      {String(total).padStart(2, "0")}
+      {String(safeTotal).padStart(2, "0")}
     </div>
   );
 }

@@ -22,6 +22,14 @@ const TXT_DARK_MUTED = "rgba(28,29,33,0.5)";
 const BORDER_DARK = "rgba(212,175,55,0.12)";
 const BORDER_LIGHT = "rgba(28,29,33,0.08)";
 
+function hexToRgba(hex: string, alpha: number): string {
+  const cleanHex = hex.replace("#", "");
+  const r = parseInt(cleanHex.length === 3 ? cleanHex[0] + cleanHex[0] : cleanHex.substring(0, 2), 16) || 0;
+  const g = parseInt(cleanHex.length === 3 ? cleanHex[1] + cleanHex[1] : cleanHex.substring(2, 4), 16) || 0;
+  const b = parseInt(cleanHex.length === 3 ? cleanHex[2] + cleanHex[2] : cleanHex.substring(4, 6), 16) || 0;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // Preview panel dimensions (scaled down from full viewport)
 const PANEL_W = 860;
 const PANEL_H = 540;
@@ -89,7 +97,7 @@ export default function PillarPreview({
               style={{ minWidth: `${totalPanels * PANEL_W}px` }}
             >
               {/* Panel 1 — Hero */}
-              <HeroPanel data={data} totalPanels={totalPanels} />
+              <HeroPanel data={data} totalPanels={totalPanels} projectTheme={data.theme} />
 
               {/* Dynamic content block panels */}
               {contentBlocks.map((block, i) => (
@@ -99,6 +107,7 @@ export default function PillarPreview({
                   panelIdx={i + 1}
                   totalPanels={totalPanels}
                   projectImage={data.image}
+                  projectTheme={data.theme}
                 />
               ))}
 
@@ -107,6 +116,7 @@ export default function PillarPreview({
                 nextSlug={contentBlocks.length > 0 ? data.slug : null}
                 panelIdx={totalPanels - 1}
                 totalPanels={totalPanels}
+                projectTheme={data.theme}
               />
             </div>
           </div>
@@ -129,8 +139,7 @@ export default function PillarPreview({
 // ═══════════════════════════════════════════════════════════════════════
 
 /** Exact copy of ImageFallback from PillarDetailClient */
-function ImageFallback({ idx = 0 }: { idx?: number }) {
-  const safeIdx = typeof idx === "number" && !isNaN(idx) ? idx : 0;
+function ImageFallback({ idx }: { idx: number }) {
   return (
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
       <div
@@ -169,7 +178,7 @@ function ImageFallback({ idx = 0 }: { idx?: number }) {
             color: TXT_LIGHT,
           }}
         >
-          {String(safeIdx + 1).padStart(2, "0")}
+          {String(idx + 1).padStart(2, "0")}
         </span>
       </div>
       <div
@@ -186,15 +195,16 @@ function ImageFallback({ idx = 0 }: { idx?: number }) {
 
 /** Exact copy of SectionLabel from PillarDetailClient */
 function SectionLabel({
-  idx = 0,
+  idx,
   text,
   light,
+  accentHex,
 }: {
-  idx?: number;
+  idx: number;
   text: string;
   light?: boolean;
+  accentHex?: string;
 }) {
-  const safeIdx = typeof idx === "number" && !isNaN(idx) ? idx : 0;
   return (
     <div
       style={{
@@ -209,7 +219,7 @@ function SectionLabel({
           width: "6px",
           height: "6px",
           borderRadius: "50%",
-          backgroundColor: light ? TXT_DARK : GOLD,
+          backgroundColor: light ? TXT_DARK : (accentHex || GOLD),
           flexShrink: 0,
           display: "inline-block",
         }}
@@ -223,7 +233,7 @@ function SectionLabel({
           color: light ? TXT_DARK_MUTED : TXT_MUTED,
         }}
       >
-        {String(safeIdx + 1).padStart(2, "0")} — {text || "Detail"}
+        {String(idx + 1).padStart(2, "0")} — {text}
       </span>
     </div>
   );
@@ -231,16 +241,16 @@ function SectionLabel({
 
 /** Panel counter — "01 / 03" bottom right, matching PillarDetailClient */
 function PanelCounter({
-  idx = 0,
-  total = 1,
+  idx,
+  total,
   light,
+  accentHex,
 }: {
-  idx?: number;
-  total?: number;
+  idx: number;
+  total: number;
   light?: boolean;
+  accentHex?: string;
 }) {
-  const safeIdx = typeof idx === "number" && !isNaN(idx) ? idx : 0;
-  const safeTotal = typeof total === "number" && !isNaN(total) ? total : 1;
   return (
     <div
       style={{
@@ -257,15 +267,14 @@ function PanelCounter({
         gap: "4px",
       }}
     >
-      <span style={{ color: GOLD }}>{String(safeIdx + 1).padStart(2, "0")}</span>
+      <span style={{ color: accentHex || GOLD }}>{String(idx + 1).padStart(2, "0")}</span>
       <span style={{ opacity: 0.3, margin: "0 2px" }}>/</span>
-      {String(safeTotal).padStart(2, "0")}
+      {String(total).padStart(2, "0")}
     </div>
   );
 }
 
-/** Top nav bar — matches PillarDetailClient nav exactly */
-function TopNav({ tags }: { tags: string[] }) {
+function TopNav({ tags, accentHex }: { tags: string[]; accentHex?: string }) {
   return (
     <div
       style={{
@@ -306,7 +315,7 @@ function TopNav({ tags }: { tags: string[] }) {
         Back
       </span>
 
-      {/* Tags — gold right side */}
+      {/* Tags — custom accent right side */}
       {tags.length > 0 && (
         <span
           style={{
@@ -314,7 +323,7 @@ function TopNav({ tags }: { tags: string[] }) {
             letterSpacing: "0.25em",
             textTransform: "uppercase" as const,
             fontWeight: 500,
-            color: GOLD,
+            color: accentHex || GOLD,
             opacity: 0.8,
           }}
         >
@@ -333,11 +342,14 @@ function TopNav({ tags }: { tags: string[] }) {
 function HeroPanel({
   data,
   totalPanels,
+  projectTheme,
 }: {
   data: PillarPreviewData;
   totalPanels: number;
+  projectTheme: { background: string; text: string; accent: string };
 }) {
   const hasImage = !!data.image;
+  const accent = projectTheme.accent || GOLD;
 
   return (
     <div
@@ -353,7 +365,7 @@ function HeroPanel({
         overflow: "hidden",
       }}
     >
-      <TopNav tags={data.tags} />
+      <TopNav tags={data.tags} accentHex={accent} />
 
       {/* ── Left: Text Content — 46% width like public site ── */}
       <div
@@ -371,12 +383,12 @@ function HeroPanel({
         }}
       >
         {/* Section label: "• 01 — TAG" */}
-        <SectionLabel idx={0} text={data.tags[0] || "Pillar"} light={false} />
+        <SectionLabel idx={0} text={data.tags[0] || "Pillar"} light={false} accentHex={accent} />
 
         {/* Title — Georgia serif, large, 400 weight */}
         <h1
           style={{
-            fontFamily: "Georgia, serif",
+            fontFamily: "var(--font-serif), Georgia, serif",
             fontSize: "2.4rem",
             fontWeight: 400,
             lineHeight: 1.1,
@@ -449,8 +461,8 @@ function HeroPanel({
                   alignItems: "center",
                   gap: "12px",
                   padding: "10px 22px",
-                  border: "1px solid rgba(212,175,55,0.5)",
-                  color: GOLD,
+                  border: `1px solid ${hexToRgba(accent, 0.5)}`,
+                  color: accent,
                   fontSize: "9px",
                   fontWeight: 700,
                   letterSpacing: "0.25em",
@@ -473,7 +485,7 @@ function HeroPanel({
                   letterSpacing: "0.45em",
                   fontWeight: 700,
                   textTransform: "uppercase" as const,
-                  color: GOLD,
+                  color: accent,
                   marginBottom: "8px",
                   marginTop: 0,
                 }}
@@ -484,7 +496,7 @@ function HeroPanel({
                 style={{
                   width: "36px",
                   height: "1px",
-                  backgroundColor: "rgba(212,175,55,0.35)",
+                  backgroundColor: hexToRgba(accent, 0.35),
                   marginBottom: "12px",
                 }}
               />
@@ -517,7 +529,7 @@ function HeroPanel({
                         width: "4px",
                         height: "4px",
                         borderRadius: "50%",
-                        backgroundColor: GOLD,
+                        backgroundColor: accent,
                         opacity: 0.7,
                         flexShrink: 0,
                         display: "inline-block",
@@ -563,7 +575,7 @@ function HeroPanel({
               inset: 0,
               opacity: 0.025,
               backgroundImage:
-                "repeating-linear-gradient(135deg, transparent, transparent 2px, rgba(212,175,55,.15) 2px, rgba(212,175,55,.15) 3px)",
+                `repeating-linear-gradient(135deg, transparent, transparent 2px, ${hexToRgba(accent, 0.15)} 2px, ${hexToRgba(accent, 0.15)} 3px)`,
               backgroundSize: "8px 8px",
               zIndex: 1,
             }}
@@ -585,7 +597,7 @@ function HeroPanel({
                 width: "180px",
                 height: "180px",
                 borderRadius: "50%",
-                border: `1px solid ${GOLD}`,
+                border: `1px solid ${accent}`,
                 opacity: 0.03,
               }}
             />
@@ -636,7 +648,7 @@ function HeroPanel({
                 width: "5px",
                 height: "5px",
                 borderRadius: "50%",
-                backgroundColor: "rgba(212,175,55,0.5)",
+                backgroundColor: hexToRgba(accent, 0.5),
                 display: "inline-block",
               }}
             />
@@ -677,7 +689,7 @@ function HeroPanel({
           left: 0,
           right: 0,
           height: "1px",
-          backgroundColor: "rgba(212,175,55,0.1)",
+          backgroundColor: hexToRgba(accent, 0.1),
           zIndex: 50,
         }}
       >
@@ -685,13 +697,13 @@ function HeroPanel({
           style={{
             height: "100%",
             width: `${(1 / totalPanels) * 100}%`,
-            backgroundColor: GOLD,
+            backgroundColor: accent,
           }}
         />
       </div>
 
       {/* Panel counter */}
-      <PanelCounter idx={0} total={totalPanels} />
+      <PanelCounter idx={0} total={totalPanels} accentHex={accent} />
     </div>
   );
 }
@@ -706,17 +718,19 @@ function ContentBlockPanel({
   panelIdx,
   totalPanels,
   projectImage,
+  projectTheme,
 }: {
   block: ContentBlock;
   panelIdx: number;
   totalPanels: number;
   projectImage: string;
+  projectTheme: { background: string; text: string; accent: string };
 }) {
   const isLight = block.theme === "light";
-  const panelBg = isLight ? BG_LIGHT : BG_PANEL;
-  const panelTxt = isLight ? TXT_DARK : TXT_LIGHT;
-  const mutedColor = isLight ? TXT_DARK_MUTED : TXT_MUTED;
-  const borderColor = isLight ? BORDER_LIGHT : BORDER_DARK;
+  const bgHex = isLight ? projectTheme.text : projectTheme.background;
+  const txtHex = isLight ? projectTheme.background : projectTheme.text;
+  const accentHex = projectTheme.accent;
+
   const displayImage = block.image || projectImage;
   const isEmpty = !block.heading && !block.body && !block.image;
 
@@ -725,128 +739,141 @@ function ContentBlockPanel({
       style={{
         width: `${PANEL_W}px`,
         height: `${PANEL_H}px`,
-        backgroundColor: panelBg,
-        color: panelTxt,
+        backgroundColor: BG_DARK,
         position: "relative",
         display: "flex",
-        flexDirection: "row" as const,
+        alignItems: "center",
+        justifyContent: "center",
         flexShrink: 0,
+        padding: "32px",
         overflow: "hidden",
       }}
     >
-      {isEmpty ? (
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column" as const,
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            color: mutedColor,
-          }}
-        >
-          <span style={{ fontSize: "13px", opacity: 0.5 }}>Empty block</span>
-          <span style={{ fontSize: "10px", opacity: 0.3 }}>
-            Add heading, body, or image
-          </span>
-        </div>
-      ) : (
-        <>
-          {/* Text — left side, same proportions as CaseStudyBlock */}
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          maxWidth: "760px",
+          backgroundColor: hexToRgba(bgHex, 0.9),
+          color: txtHex,
+          display: "flex",
+          flexDirection: "row" as const,
+          borderRadius: "24px",
+          border: `1px solid ${hexToRgba(txtHex, 0.08)}`,
+          boxShadow: `0 20px 60px -10px ${hexToRgba(bgHex, 0.5)}`,
+          overflow: "hidden",
+        }}
+      >
+        {isEmpty ? (
           <div
             style={{
               flex: 1,
               display: "flex",
               flexDirection: "column" as const,
+              alignItems: "center",
               justifyContent: "center",
-              padding: "48px 40px 48px 48px",
-              overflow: "hidden",
+              gap: "8px",
+              color: hexToRgba(txtHex, 0.5),
             }}
           >
-            {/* Section label */}
-            <SectionLabel
-              idx={panelIdx}
-              text={block.heading ? block.heading.slice(0, 22) : "Detail"}
-              light={isLight}
-            />
-
-            {/* Heading — Georgia serif, 400 weight matches public site */}
-            {block.heading && (
-              <h3
-                style={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: "1.8rem",
-                  fontWeight: 400,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.1,
-                  marginBottom: "20px",
-                  color: panelTxt,
-                  marginTop: 0,
-                }}
-              >
-                {block.heading}
-              </h3>
-            )}
-
-            {/* Body — rendered as HTML, matches public site prose */}
-            {block.body && (
-              <div
-                style={{
-                  fontSize: "13px",
-                  lineHeight: 1.85,
-                  color: mutedColor,
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 7,
-                  WebkitBoxOrient: "vertical" as const,
-                }}
-                dangerouslySetInnerHTML={{ __html: block.body }}
-              />
-            )}
+            <span style={{ fontSize: "13px" }}>Empty block</span>
+            <span style={{ fontSize: "10px", opacity: 0.6 }}>
+              Add heading, body, or image
+            </span>
           </div>
-
-          {/* Image — right side with border, matches CaseStudyBlock */}
-          {displayImage && (
+        ) : (
+          <>
+            {/* Text — left side, same proportions as CaseStudyBlock */}
             <div
               style={{
-                width: "38%",
-                flexShrink: 0,
-                borderLeft: `1px solid ${borderColor}`,
+                flex: 1,
                 display: "flex",
-                alignItems: "center",
+                flexDirection: "column" as const,
                 justifyContent: "center",
-                padding: "24px",
+                padding: "40px",
+                overflowY: "auto",
               }}
             >
+              {/* Section label */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: accentHex, flexShrink: 0, boxShadow: `0 0 6px ${hexToRgba(accentHex, 0.6)}` }} />
+                <span style={{ fontSize: "9px", letterSpacing: "0.25em", textTransform: "uppercase", fontWeight: 600, color: hexToRgba(txtHex, 0.7) }}>
+                  {String(panelIdx + 1).padStart(2, "0")} — {block.heading ? block.heading.slice(0, 22) : "Detail"}
+                </span>
+              </div>
+
+              {/* Heading — Style varies by block type */}
+              {block.heading && (
+                <h3
+                  style={{
+                    fontFamily: "var(--font-serif), Georgia, serif",
+                    fontSize: "2rem",
+                    fontWeight: 600,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.1,
+                    marginBottom: "20px",
+                    color: block.type === "feature" ? "transparent" : txtHex,
+                    WebkitTextStroke: block.type === "feature" ? `1px ${hexToRgba(txtHex, 0.9)}` : undefined,
+                    marginTop: 0,
+                  }}
+                >
+                  {block.heading}
+                </h3>
+              )}
+
+              {/* Body */}
+              {block.body && (
+                <div
+                  style={{
+                    fontSize: "12px",
+                    lineHeight: 1.85,
+                    color: hexToRgba(txtHex, 0.8),
+                  }}
+                  dangerouslySetInnerHTML={{ __html: block.body }}
+                />
+              )}
+            </div>
+
+            {/* Image — right side with border */}
+            {displayImage && (
               <div
                 style={{
-                  position: "relative",
-                  width: "100%",
-                  aspectRatio: "4/5",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+                  width: "42%",
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "stretch",
+                  padding: "20px",
                 }}
               >
-                <ImageFallback idx={panelIdx} />
-                <img
-                  src={displayImage}
-                  alt={block.heading || `Block ${panelIdx + 1}`}
+                <div
                   style={{
-                    position: "absolute",
-                    inset: 0,
+                    position: "relative",
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
-                    zIndex: 10,
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    boxShadow: `0 16px 40px ${hexToRgba(bgHex, 0.4)}`,
                   }}
-                />
+                >
+                  <ImageFallback idx={panelIdx} />
+                  <img
+                    src={displayImage}
+                    alt={block.heading || `Block ${panelIdx + 1}`}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      zIndex: 10,
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
+      </div>
 
       {/* Gold progress bar */}
       <div
@@ -864,13 +891,13 @@ function ContentBlockPanel({
           style={{
             height: "100%",
             width: `${((panelIdx + 1) / totalPanels) * 100}%`,
-            backgroundColor: isLight ? TXT_DARK : GOLD,
+            backgroundColor: isLight ? TXT_DARK : accentHex,
           }}
         />
       </div>
 
       {/* Panel counter */}
-      <PanelCounter idx={panelIdx} total={totalPanels} light={isLight} />
+      <PanelCounter idx={panelIdx} total={totalPanels} light={isLight} accentHex={accentHex} />
     </div>
   );
 }
@@ -882,11 +909,15 @@ function ContentBlockPanel({
 function LastPanel({
   panelIdx,
   totalPanels,
+  projectTheme,
 }: {
   nextSlug: string | null;
   panelIdx: number;
   totalPanels: number;
+  projectTheme: { background: string; text: string; accent: string };
 }) {
+  const accent = projectTheme.accent || GOLD;
+
   return (
     <div
       style={{
@@ -999,7 +1030,7 @@ function LastPanel({
         />
       </div>
 
-      <PanelCounter idx={panelIdx} total={totalPanels} light />
+      <PanelCounter idx={panelIdx} total={totalPanels} light accentHex={accent} />
     </div>
   );
 }

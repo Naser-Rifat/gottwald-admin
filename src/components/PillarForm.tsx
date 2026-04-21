@@ -8,7 +8,10 @@ import { X, Plus, Trash2, Loader2, AlertTriangle, Info } from "lucide-react";
 import type { Pillar, ContentBlock } from "../lib/types/pillar";
 import { createPillar, updatePillar } from "../lib/api/pillar";
 import { ApiError } from "../lib/api/error";
-import { validateImage, DEFAULT_IMAGE_CONFIG } from "../lib/utils/image-validation";
+import {
+  validateImage,
+  DEFAULT_IMAGE_CONFIG,
+} from "../lib/utils/image-validation";
 import ContentBlockBuilder from "./ContentBlockBuilder";
 import PillarPreview from "./PillarPreview";
 import { OffersBuilder } from "./OffersBuilder";
@@ -129,12 +132,14 @@ function SectionHeader({
 // ─── ZOD SCHEMA ──────────────────────────────────────────────────────────────
 
 const pillarSchema = z.object({
-  offers: z.array(z.object({
-    title: z.string(),
-    tier: z.enum(["copper", "silver", "gold"]),
-    description: z.string(),
-    deliverable: z.string(),
-  })),
+  offers: z.array(
+    z.object({
+      title: z.string(),
+      tier: z.enum(["copper", "silver", "gold"]),
+      description: z.string(),
+      deliverable: z.string(),
+    }),
+  ),
   title: z
     .string()
     .min(2, "Title is required")
@@ -143,7 +148,10 @@ const pillarSchema = z.object({
     .string()
     .min(2)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Lowercase letters and hyphens only"),
-  description: z.string().min(1, "Description is required").max(DESCRIPTION_MAX, `Max ${DESCRIPTION_MAX} characters`),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(DESCRIPTION_MAX, `Max ${DESCRIPTION_MAX} characters`),
   details: z.string().min(1, "Details are required"),
   launchUrl: z.string().url("Must be a valid URL").or(z.literal("")),
   tags: z.array(z.string()).min(1, "Add at least one tag"),
@@ -219,14 +227,17 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
 
   const handleBlocksChange = useCallback(
     (fn: (prev: ContentBlock[]) => ContentBlock[]) => setContentBlocks(fn),
-    []
+    [],
   );
 
   const handleOffersChange = useCallback(
     (fn: (prev: PillarFormValues["offers"]) => PillarFormValues["offers"]) => {
-      setValue("offers", fn((watch("offers") as PillarFormValues["offers"]) || []));
+      setValue(
+        "offers",
+        fn((watch("offers") as PillarFormValues["offers"]) || []),
+      );
     },
-    [watch, setValue]
+    [watch, setValue],
   );
 
   const tags = watch("tags");
@@ -237,9 +248,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const watchedDescription = watch("description");
   const watchedDetails = watch("details");
   const watchedLaunchUrl = watch("launchUrl");
-  const watchOffers=watch("offers");
-
-
+  const watchOffers = watch("offers");
 
   // Register fields once and capture their refs + handlers
   const titleRegistration = register("title");
@@ -247,8 +256,12 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const detailsRegistration = register("details");
 
   // Auto-resize textareas when their values change
-  useEffect(() => { autoResizeTextarea(titleRef.current, 42); }, [watchedTitle]);
-  useEffect(() => { autoResizeTextarea(descriptionRef.current, 60); }, [watchedDescription]);
+  useEffect(() => {
+    autoResizeTextarea(titleRef.current, 42);
+  }, [watchedTitle]);
+  useEffect(() => {
+    autoResizeTextarea(descriptionRef.current, 60);
+  }, [watchedDescription]);
 
   // ─── SLUG AUTO-GENERATE ──────────────────────────────────────────────────────
 
@@ -352,15 +365,16 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
     // Filter out empty services before submission
     const cleanedServices = data.services.filter((s) => s.trim() !== "");
     if (cleanedServices.length === 0) {
-      setError("services", { type: "manual", message: "Add at least one non-empty service" });
+      setError("services", {
+        type: "manual",
+        message: "Add at least one non-empty service",
+      });
       return;
     }
 
     setSubmitting(true);
     try {
-      const imageUrl = imageFile
-        ? ""
-        : (data.image || initialData?.image || "");
+      const imageUrl = imageFile ? "" : data.image || initialData?.image || "";
 
       const pillarData: Pillar = {
         ...data,
@@ -384,15 +398,32 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
       if (err instanceof ApiError && err.data) {
         Object.entries(err.data).forEach(([key, messages]) => {
           const message = Array.isArray(messages) ? messages[0] : messages;
-          if (["title", "slug", "description", "details", "launchUrl", "tags", "services", "theme", "image"].includes(key)) {
-            setError(key as keyof PillarFormValues, { type: "server", message: String(message) });
+          if (
+            [
+              "title",
+              "slug",
+              "description",
+              "details",
+              "launchUrl",
+              "tags",
+              "services",
+              "theme",
+              "image",
+            ].includes(key)
+          ) {
+            setError(key as keyof PillarFormValues, {
+              type: "server",
+              message: String(message),
+            });
           } else if (key !== "detail" && key !== "message") {
             toast.error(`${key}: ${message}`);
           }
         });
         toast.error(err.message || "Please fix the validation errors below.");
       } else {
-        toast.error(err instanceof Error ? err.message : "Something went wrong");
+        toast.error(
+          err instanceof Error ? err.message : "Something went wrong",
+        );
       }
     } finally {
       setSubmitting(false);
@@ -420,9 +451,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         {/* Title */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">
-              Title
-            </label>
+            <label className="text-sm font-medium text-zinc-300">Title</label>
             <CharCounter current={titleLen} max={TITLE_MAX} />
           </div>
           <textarea
@@ -443,7 +472,8 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             <p className="text-xs text-red-400 mt-1">{errors.title.message}</p>
           )}
           <FieldHint>
-            A concise, compelling title. This appears as the main heading on the public pillar page.
+            A concise, compelling title. This appears as the main heading on the
+            public pillar page.
           </FieldHint>
         </div>
 
@@ -459,7 +489,10 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             <input
               {...register("slug")}
               onChange={(e) => {
-                setValue("slug", e.target.value, { shouldValidate: true, shouldDirty: true });
+                setValue("slug", e.target.value, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
                 setIsSlugManuallyEdited(true);
               }}
               placeholder="pillar-slug"
@@ -470,7 +503,8 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             <p className="text-xs text-red-400 mt-1">{errors.slug.message}</p>
           )}
           <FieldHint>
-            URL-friendly identifier. Auto-generated from the title — edit manually to customize.
+            URL-friendly identifier. Auto-generated from the title — edit
+            manually to customize.
           </FieldHint>
         </div>
       </section>
@@ -516,16 +550,16 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             </p>
           )}
           <FieldHint>
-            A brief elevator-pitch for this pillar. Shown directly below the title on the public site. Keep it punchy and under {DESCRIPTION_MAX} characters.
+            A brief elevator-pitch for this pillar. Shown directly below the
+            title on the public site. Keep it punchy and under {DESCRIPTION_MAX}{" "}
+            characters.
           </FieldHint>
         </div>
 
         {/* Details */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">
-              Details
-            </label>
+            <label className="text-sm font-medium text-zinc-300">Details</label>
           </div>
           <textarea
             name={detailsRegistration.name}
@@ -543,17 +577,24 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           <div className="flex items-center justify-between mt-1.5">
             <CharCounter
               current={detailsLen}
-              recommended={{ min: DETAILS_RECOMMENDED_MIN, max: DETAILS_RECOMMENDED_MAX }}
+              recommended={{
+                min: DETAILS_RECOMMENDED_MIN,
+                max: DETAILS_RECOMMENDED_MAX,
+              }}
             />
             <span className="text-[11px] text-zinc-600 tabular-nums">
               {detailsWords} word{detailsWords !== 1 ? "s" : ""}
             </span>
           </div>
           {errors.details && (
-            <p className="text-xs text-red-400 mt-1">{errors.details.message}</p>
+            <p className="text-xs text-red-400 mt-1">
+              {errors.details.message}
+            </p>
           )}
           <FieldHint>
-            The extended body copy for this pillar. Appears below the description in a smaller font. Recommended {DETAILS_RECOMMENDED_MIN}–{DETAILS_RECOMMENDED_MAX} characters for optimal readability.
+            The extended body copy for this pillar. Appears below the
+            description in a smaller font. Recommended {DETAILS_RECOMMENDED_MIN}
+            –{DETAILS_RECOMMENDED_MAX} characters for optimal readability.
           </FieldHint>
         </div>
       </section>
@@ -611,7 +652,8 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
                     : "Upload Image"}
               </button>
               <p className="text-[10px] text-zinc-600">
-                JPEG, PNG, WebP, AVIF, GIF · Max {DEFAULT_IMAGE_CONFIG.maxSizeLabel}
+                JPEG, PNG, WebP, AVIF, GIF · Max{" "}
+                {DEFAULT_IMAGE_CONFIG.maxSizeLabel}
               </p>
             </div>
           </div>
@@ -647,7 +689,8 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             </p>
           )}
           <FieldHint>
-            The "Visit Website" button will link to this URL. Must be a fully qualified URL (e.g. https://...).
+            The "Visit Website" button will link to this URL. Must be a fully
+            qualified URL (e.g. https://...).
           </FieldHint>
         </div>
       </section>
@@ -662,9 +705,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         {/* Tags */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">
-              Tags
-            </label>
+            <label className="text-sm font-medium text-zinc-300">Tags</label>
             <span className="text-[11px] text-zinc-600 tabular-nums">
               {tags.length}/{MAX_TAGS}
             </span>
@@ -714,7 +755,8 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             <p className="text-xs text-red-400 mt-1">{errors.tags.message}</p>
           )}
           <FieldHint>
-            Tags appear at the top of the pillar page as categories. Displayed uppercase. Press Enter or click Add.
+            Tags appear at the top of the pillar page as categories. Displayed
+            uppercase. Press Enter or click Add.
           </FieldHint>
         </div>
 
@@ -775,10 +817,13 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             Add Service
           </button>
           {errors.services && (
-            <p className="text-xs text-red-400 mt-1">{errors.services.message}</p>
+            <p className="text-xs text-red-400 mt-1">
+              {errors.services.message}
+            </p>
           )}
           <FieldHint>
-            Individual services listed under the "Services" heading on the pillar page. Keep each entry short and specific.
+            Individual services listed under the "Services" heading on the
+            pillar page. Keep each entry short and specific.
           </FieldHint>
         </div>
       </section>
@@ -828,7 +873,17 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           </span>
         </div>
       </section>
-
+      {/* ═══════════════ Offers ═══════════════ */}
+      <section>
+        <SectionHeader
+          title="Offers"
+          description="Manage service tiers and strategic offerings"
+        />
+        <OffersBuilder
+          offers={(watchOffers as PillarFormValues["offers"]) || []}
+          onChange={handleOffersChange}
+        />
+      </section>
       {/* ═══════════════ Content Blocks ═══════════════ */}
       <section>
         <SectionHeader
@@ -838,17 +893,6 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         <ContentBlockBuilder
           blocks={contentBlocks}
           onChange={handleBlocksChange}
-        />
-      </section>
-      {/* ═══════════════ Offers ═══════════════ */}
-      <section>
-        <SectionHeader
-          title="Offers"
-          description="Manage service tiers and strategic offerings"
-        />
-        <OffersBuilder
-          offers={ watchOffers as PillarFormValues["offers"] || []}
-          onChange={handleOffersChange}
         />
       </section>
 
@@ -864,7 +908,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           image: imagePreview,
           launchUrl: watchedLaunchUrl,
           theme,
-          offers: watchOffers as PillarFormValues["offers"] || [],
+          offers: (watchOffers as PillarFormValues["offers"]) || [],
           contentBlocks,
         }}
         visible={showPreview}

@@ -31,6 +31,7 @@ interface ApiPillar {
   updated_at?: string;
   tags?: string | string[];
   services?: string | string[];
+  offers?: string | unknown[];
   theme?: string | PillarTheme;
   image?: string;
   content_blocks?: ApiContentBlock[];
@@ -92,6 +93,17 @@ function toTheme(val: string | PillarTheme | undefined): PillarTheme {
   }
 }
 
+function toOffers(val: string | unknown[] | undefined): Pillar["offers"] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val as Pillar["offers"];
+  try {
+    const parsed = JSON.parse(String(val));
+    return Array.isArray(parsed) ? (parsed as Pillar["offers"]) : [];
+  } catch {
+    return [];
+  }
+}
+
 const VALID_BLOCK_TYPES = ["rich-text", "image", "video"];
 
 function mapApiPillarToPillar(api: ApiPillar): Pillar {
@@ -120,6 +132,7 @@ function mapApiPillarToPillar(api: ApiPillar): Pillar {
     launchUrl: api.launch_url ?? "",
     tags: toArray(api.tags),
     services: toArray(api.services),
+    offers: toOffers(api.offers),
     theme: toTheme(api.theme),
     contentBlocks: blocks,
   };
@@ -134,6 +147,7 @@ function buildFormData(p: CreatePillarPayload | UpdatePillarPayload, imageFile?:
   if (p.launchUrl != null) fd.append("launch_url", p.launchUrl);
   if (p.tags != null) fd.append("tags", JSON.stringify(toArray(p.tags)));
   if (p.services != null) fd.append("services", JSON.stringify(toArray(p.services)));
+  if (p.offers != null) fd.append("offers", JSON.stringify(p.offers));
   if (p.theme != null) fd.append("theme", JSON.stringify(p.theme));
   fd.append("is_active", "true");
   if (p.contentBlocks != null) {

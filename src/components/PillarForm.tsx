@@ -11,6 +11,7 @@ import { ApiError } from "../lib/api/error";
 import { validateImage, DEFAULT_IMAGE_CONFIG } from "../lib/utils/image-validation";
 import ContentBlockBuilder from "./ContentBlockBuilder";
 import PillarPreview from "./PillarPreview";
+import { OffersBuilder } from "./OffersBuilder";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -128,6 +129,12 @@ function SectionHeader({
 // ─── ZOD SCHEMA ──────────────────────────────────────────────────────────────
 
 const pillarSchema = z.object({
+  offers: z.array(z.object({
+    title: z.string(),
+    tier: z.enum(["copper", "silver", "gold"]),
+    description: z.string(),
+    deliverable: z.string(),
+  })),
   title: z
     .string()
     .min(2, "Title is required")
@@ -191,6 +198,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   } = useForm<PillarFormValues>({
     resolver: zodResolver(pillarSchema),
     defaultValues: {
+      offers: initialData?.offers || [],
       title: initialData?.title || "",
       slug: initialData?.slug || "",
       description: initialData?.description || "",
@@ -212,6 +220,13 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const handleBlocksChange = useCallback(
     (fn: (prev: ContentBlock[]) => ContentBlock[]) => setContentBlocks(fn),
     []
+  );
+
+  const handleOffersChange = useCallback(
+    (fn: (prev: PillarFormValues["offers"]) => PillarFormValues["offers"]) => {
+      setValue("offers", fn((watch("offers") as PillarFormValues["offers"]) || []));
+    },
+    [watch, setValue]
   );
 
   const tags = watch("tags");
@@ -820,6 +835,17 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         <ContentBlockBuilder
           blocks={contentBlocks}
           onChange={handleBlocksChange}
+        />
+      </section>
+      {/* ═══════════════ Offers ═══════════════ */}
+      <section>
+        <SectionHeader
+          title="Offers"
+          description="Manage service tiers and strategic offerings"
+        />
+        <OffersBuilder
+          offers={(watch("offers") as PillarFormValues["offers"]) || []}
+          onChange={handleOffersChange}
         />
       </section>
 

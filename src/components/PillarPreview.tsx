@@ -13,14 +13,14 @@ import { Eye, EyeOff } from "lucide-react";
 // ─── Design tokens — MUST match PillarDetailClient.tsx exactly ────────────────
 const GOLD = "#d4af37";
 const BG_DARK = "#000000";
-const BG_PANEL = "#0a0a0e";
+// const BG_PANEL = "#0a0a0e";
 const BG_LIGHT = "#f5f0eb";
 const TXT_LIGHT = "#f5f5f5";
 const TXT_MUTED = "rgba(255,255,255,0.8)";
 const TXT_DARK = "#1c1d21";
 const TXT_DARK_MUTED = "rgba(28,29,33,0.5)";
-const BORDER_DARK = "rgba(212,175,55,0.12)";
-const BORDER_LIGHT = "rgba(28,29,33,0.08)";
+// const BORDER_DARK = "rgba(212,175,55,0.12)";
+// const BORDER_LIGHT = "rgba(28,29,33,0.08)";
 
 function hexToRgba(hex: string, alpha: number): string {
   const cleanHex = hex.replace("#", "");
@@ -349,7 +349,7 @@ function HeroPanel({
   projectTheme: { background: string; text: string; accent: string };
 }) {
   const hasImage = !!data.image;
-  const accent = projectTheme.accent || GOLD;
+  const accent = projectTheme.background || GOLD;
 
   return (
     <div

@@ -13,7 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { validateImage, DEFAULT_IMAGE_CONFIG } from "../lib/utils/image-validation";
-import RichTextEditor from "./RichTextEditor";
+import RichTextEditor from "./ui/RichTextEditor";
 
 interface ContentBlockBuilderProps {
   blocks: ContentBlock[];

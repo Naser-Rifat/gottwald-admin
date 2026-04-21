@@ -16,6 +16,7 @@ export const MOCK_PROJECTS: Pillar[] = [
       "Implementation Support",
       "Systemic Resolution",
     ],
+    offers: [],
     contentBlocks: [
       {
         id: "block-1",

@@ -1,7 +1,7 @@
 import { Suspense, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
-import ConfirmModal from "../components/ConfirmModal";
+import ConfirmModal from "../components/ui/ConfirmModal";
 import { useAuth } from "../context/useAuth";
 import { LogOut, Loader2 } from "lucide-react";
 

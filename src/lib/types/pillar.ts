@@ -2,7 +2,7 @@ export type ContentBlockTheme = "light" | "dark";
 
 export interface ContentBlock {
   id: string;
-  type: "rich-text" | "image" | "video";
+  type: "rich-text" | "image" | "video" |"feature";
   theme?: "light" | "dark";
   heading?: string;
   body?: string;
@@ -19,6 +19,13 @@ export interface PillarTheme {
   accent: string;
 }
 
+export interface Offer {
+  title: string;
+  tier: "copper" | "silver" | "gold";
+  description: string;
+  deliverable: string;
+}
+
 export interface Pillar {
   id?: string;
   slug: string;
@@ -30,6 +37,7 @@ export interface Pillar {
   details: string;
   services: string[];
   contentBlocks: ContentBlock[];
+  offers: Offer[];
   theme: PillarTheme;
 }
 

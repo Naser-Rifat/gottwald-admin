@@ -237,6 +237,9 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const watchedDescription = watch("description");
   const watchedDetails = watch("details");
   const watchedLaunchUrl = watch("launchUrl");
+  const watchOffers=watch("offers");
+
+
 
   // Register fields once and capture their refs + handlers
   const titleRegistration = register("title");
@@ -844,7 +847,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           description="Manage service tiers and strategic offerings"
         />
         <OffersBuilder
-          offers={(watch("offers") as PillarFormValues["offers"]) || []}
+          offers={ watchOffers as PillarFormValues["offers"] || []}
           onChange={handleOffersChange}
         />
       </section>
@@ -861,6 +864,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           image: imagePreview,
           launchUrl: watchedLaunchUrl,
           theme,
+          offers: watchOffers as PillarFormValues["offers"] || [],
           contentBlocks,
         }}
         visible={showPreview}

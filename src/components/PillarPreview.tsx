@@ -7,7 +7,7 @@
  * Source of truth: lusion-next/app/pillars/[slug]/PillarDetailClient.tsx
  */
 
-import type { ContentBlock } from "../lib/types/pillar";
+import type { ContentBlock, Offer } from "../lib/types/pillar";
 import { Eye, EyeOff } from "lucide-react";
 
 // ─── Design tokens — MUST match PillarDetailClient.tsx exactly ────────────────
@@ -45,6 +45,7 @@ interface PillarPreviewData {
   launchUrl: string;
   theme: { background: string; text: string; accent: string };
   contentBlocks: ContentBlock[];
+  offers: Offer[];
 }
 
 interface PillarPreviewProps {
@@ -59,7 +60,8 @@ export default function PillarPreview({
   onToggle,
 }: PillarPreviewProps) {
   const { contentBlocks } = data;
-  const totalPanels = 2 + contentBlocks.length; // hero + blocks + last
+  const hasOffers = (data.offers?.length ?? 0) > 0;
+  const totalPanels = 2 + contentBlocks.length + (hasOffers ? 1 : 0); // hero + offers? + blocks + last
 
   return (
     <div className="space-y-4">
@@ -99,12 +101,22 @@ export default function PillarPreview({
               {/* Panel 1 — Hero */}
               <HeroPanel data={data} totalPanels={totalPanels} projectTheme={data.theme} />
 
+              {/* Offers panel — mirrors public site offers block */}
+              {hasOffers && (
+                <OffersPanel
+                  offers={data.offers}
+                  panelIdx={1}
+                  totalPanels={totalPanels}
+                  projectTheme={data.theme}
+                />
+              )}
+
               {/* Dynamic content block panels */}
               {contentBlocks.map((block, i) => (
                 <ContentBlockPanel
                   key={block.id || i}
                   block={block}
-                  panelIdx={i + 1}
+                  panelIdx={i + (hasOffers ? 2 : 1)}
                   totalPanels={totalPanels}
                   projectImage={data.image}
                   projectTheme={data.theme}
@@ -704,6 +716,377 @@ function HeroPanel({
 
       {/* Panel counter */}
       <PanelCounter idx={0} total={totalPanels} accentHex={accent} />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// OFFERS PANEL — mirrors public OffersBlock (scaled)
+// ═══════════════════════════════════════════════════════════════════════
+
+function OffersPanel({
+  offers,
+  panelIdx,
+  totalPanels,
+  projectTheme,
+}: {
+  offers: Offer[];
+  panelIdx: number;
+  totalPanels: number;
+  projectTheme: { background: string; text: string; accent: string };
+}) {
+  const accentHex = projectTheme.accent || GOLD;
+
+  const TIER_CONFIG = {
+    copper: {
+      accent: "#c07840",
+      border: "rgba(192,120,64,0.35)",
+      borderHover: "rgba(192,120,64,0.70)",
+      shadow: "0 12px 48px rgba(192,120,64,0.2), 0 0 0 1px rgba(192,120,64,0.12)",
+      badgeBg: "rgba(192,120,64,0.12)",
+      label: "Copper",
+    },
+    silver: {
+      accent: "#b8c0cc",
+      border: "rgba(184,192,204,0.30)",
+      borderHover: "rgba(184,192,204,0.65)",
+      shadow: "0 12px 48px rgba(184,192,204,0.15), 0 0 0 1px rgba(184,192,204,0.1)",
+      badgeBg: "rgba(184,192,204,0.10)",
+      label: "Silver",
+    },
+    gold: {
+      accent: "#d4af37",
+      border: "rgba(212,175,55,0.40)",
+      borderHover: "rgba(212,175,55,0.80)",
+      shadow: "0 12px 48px rgba(212,175,55,0.25), 0 0 0 1px rgba(212,175,55,0.15)",
+      badgeBg: "rgba(212,175,55,0.12)",
+      label: "Gold",
+    },
+  } as const;
+
+  const renderFeatures = (desc: string): string[] => {
+    const s = (desc || "").trim();
+    if (!s) return [];
+    if (s.includes("\n")) return s.split("\n").map((x) => x.trim()).filter(Boolean);
+    return s
+      .split(". ")
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .map((x) => (x.endsWith(".") ? x : `${x}.`));
+  };
+
+  const tierOrder: Offer["tier"][] = ["copper", "silver", "gold"];
+  const offersByTier = new Map<Offer["tier"], Offer>();
+  for (const o of offers) {
+    if (!offersByTier.has(o.tier)) offersByTier.set(o.tier, o);
+  }
+  const cards: Array<{ tier: Offer["tier"]; offer?: Offer }> = tierOrder.map((tier) => ({
+    tier,
+    offer: offersByTier.get(tier),
+  }));
+
+  return (
+    <div
+      style={{
+        width: `${PANEL_W}px`,
+        height: `${PANEL_H}px`,
+        backgroundColor: BG_DARK,
+        position: "relative",
+        display: "flex",
+        flexShrink: 0,
+        overflow: "hidden",
+        padding: "28px",
+      }}
+    >
+      {/* Atmosphere */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background: `radial-gradient(circle at top, ${hexToRgba(accentHex, 0.05)} 0%, transparent 55%)`,
+        }}
+      />
+
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          borderRadius: "28px",
+          border: `1px solid ${hexToRgba(TXT_LIGHT, 0.06)}`,
+          background: "rgba(5, 8, 12, 0.62)",
+          boxShadow: "0 20px 70px rgba(0,0,0,0.6)",
+          display: "flex",
+          flexDirection: "column" as const,
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: "26px 30px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+            <span
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                backgroundColor: accentHex,
+                boxShadow: `0 0 10px ${hexToRgba(accentHex, 0.65)}`,
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                fontWeight: 800,
+                color: "rgba(255,255,255,0.8)",
+              }}
+            >
+              {String(panelIdx + 1).padStart(2, "0")} — Strategic Offers
+            </span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "16px" }}>
+            <h3
+              style={{
+                fontFamily: "var(--font-serif), Georgia, serif",
+                fontSize: "2.2rem",
+                fontWeight: 500,
+                margin: 0,
+                color: TXT_LIGHT,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.05,
+              }}
+            >
+              Engagement Matrix
+            </h3>
+
+            {/* Legend */}
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", paddingBottom: "6px" }}>
+              {(["copper", "silver", "gold"] as const).map((t) => (
+                <div key={t} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      background: TIER_CONFIG[t].accent,
+                      boxShadow: `0 0 10px ${hexToRgba(TIER_CONFIG[t].accent, 0.55)}`,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "9px",
+                      letterSpacing: "0.25em",
+                      textTransform: "uppercase",
+                      fontWeight: 800,
+                      color: TIER_CONFIG[t].accent,
+                    }}
+                  >
+                    {TIER_CONFIG[t].label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Cards grid (scaled down from public) */}
+        <div
+          style={{
+            padding: "16px 22px 22px",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            gap: "16px",
+            flex: 1,
+            overflow: "hidden",
+          }}
+        >
+          {cards.map(({ tier, offer }, idx) => {
+            const key = (tier in TIER_CONFIG ? tier : "gold") as keyof typeof TIER_CONFIG;
+            const tc = TIER_CONFIG[key];
+            const isCenter = idx === 1;
+            const features = renderFeatures(offer?.description || "");
+            const isEmpty = !offer;
+
+            return (
+              <div
+                key={`${tier}-${idx}`}
+                style={{
+                  minWidth: 0,
+                  borderRadius: "28px",
+                  overflow: "hidden",
+                  position: "relative",
+                  border: `1px solid ${isCenter ? tc.borderHover : tc.border}`,
+                  backgroundColor: isEmpty ? "rgba(5, 8, 12, 0.38)" : "rgba(5, 8, 12, 0.56)",
+                  boxShadow: isCenter
+                    ? `0 22px 80px -18px ${hexToRgba(tc.accent, 0.55)}`
+                    : "0 12px 44px -20px rgba(0,0,0,0.75)",
+                  transform: isCenter ? "translateY(-10px) scale(1.03)" : "translateY(4px)",
+                  opacity: isEmpty ? 0.55 : isCenter ? 1 : 0.9,
+                }}
+              >
+                {/* Header plate */}
+                <div
+                  style={{
+                    padding: "22px 18px 34px",
+                    backgroundColor: "rgba(2, 4, 8, 0.40)",
+                    clipPath: "polygon(0 0, 100% 0, 100% 86%, 50% 100%, 0 86%)",
+                    position: "relative",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: "1px",
+                      background: `linear-gradient(90deg, transparent, ${hexToRgba(tc.accent, 0.75)}, transparent)`,
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: `radial-gradient(ellipse at top, ${hexToRgba(tc.accent, 0.25)} 0%, transparent 70%)`,
+                      opacity: 0.55,
+                      pointerEvents: "none",
+                    }}
+                  />
+
+                  <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+                    <span
+                      style={{
+                        fontSize: "9px",
+                        letterSpacing: "0.30em",
+                        textTransform: "uppercase",
+                        fontWeight: 800,
+                        color: tc.accent,
+                        padding: "8px 14px",
+                        borderRadius: "999px",
+                        backgroundColor: "rgba(0,0,0,0.45)",
+                        border: "1px solid rgba(255,255,255,0.10)",
+                        backdropFilter: "blur(10px)",
+                      }}
+                    >
+                      {tc.label} Pack
+                    </span>
+                  </div>
+
+                  <h4
+                    style={{
+                      margin: 0,
+                      fontFamily: "var(--font-serif), Georgia, serif",
+                      fontSize: "18px",
+                      fontWeight: 600,
+                      lineHeight: 1.15,
+                      color: TXT_LIGHT,
+                      textAlign: "center",
+                      padding: "0 10px",
+                      textShadow: "0 2px 18px rgba(0,0,0,0.6)",
+                      minHeight: "44px",
+                    }}
+                  >
+                    {offer?.title || "Add offer"}
+                  </h4>
+                </div>
+
+                {/* Body */}
+                <div style={{ padding: "16px 18px 18px", marginTop: "-14px", height: "calc(100% - 120px)", display: "flex", flexDirection: "column" }}>
+                  <div style={{ flex: 1, overflow: "hidden" }}>
+                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {(features.length ? features : ["Offer description"]).slice(0, 5).map((f, fIdx) => (
+                        <li key={fIdx} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                          <span
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              borderRadius: "999px",
+                              border: `1px solid ${hexToRgba(tc.accent, 0.70)}`,
+                              color: tc.accent,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "rgba(0,0,0,0.18)",
+                              flexShrink: 0,
+                              marginTop: "1px",
+                              boxShadow: "inset 0 0 10px rgba(0,0,0,0.55)",
+                            }}
+                          >
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </span>
+                          <span style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.88)" }}>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Deliverable + CTA */}
+                  <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.10)" }}>
+                    <div style={{ textAlign: "center" }}>
+                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 800, color: tc.accent }}>
+                        Deliverable
+                      </span>
+                      <span style={{ display: "block", marginTop: "6px", fontSize: "11px", lineHeight: 1.45, color: "rgba(255,255,255,0.92)" }}>
+                        {offer?.deliverable || "Deliverable"}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled
+                      style={{
+                        marginTop: "12px",
+                        width: "100%",
+                        padding: "12px 14px",
+                        borderRadius: "999px",
+                        border: `1px solid ${hexToRgba(tc.accent, 0.55)}`,
+                        background: `linear-gradient(90deg, ${hexToRgba(tc.accent, 0.28)} 0%, ${hexToRgba(tc.accent, 0.10)} 100%)`,
+                        color: TXT_LIGHT,
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        letterSpacing: "0.25em",
+                        textTransform: "uppercase",
+                        cursor: "not-allowed",
+                        opacity: isEmpty ? 0.55 : 1,
+                      }}
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Gold progress bar */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "1px",
+          backgroundColor: hexToRgba(accentHex, 0.1),
+          zIndex: 50,
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${((panelIdx + 1) / totalPanels) * 100}%`,
+            backgroundColor: accentHex,
+          }}
+        />
+      </div>
+
+      <PanelCounter idx={panelIdx} total={totalPanels} accentHex={accentHex} />
     </div>
   );
 }

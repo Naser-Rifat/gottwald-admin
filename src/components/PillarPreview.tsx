@@ -267,19 +267,20 @@ function PanelCounter({
     <div
       style={{
         position: "absolute",
-        bottom: "24px",
+        bottom: "10px",
         right: "28px",
         fontSize: "11px",
+        zIndex:1000,
         letterSpacing: "0.25em",
         textTransform: "uppercase" as const,
         fontWeight: 500,
-        color: light ? TXT_DARK_MUTED : TXT_MUTED,
+        // color: light ? TXT_DARK_MUTED : TXT_MUTED,
         display: "flex",
         alignItems: "center",
         gap: "4px",
       }}
     >
-      <span style={{ color: accentHex || GOLD }}>{String(idx + 1).padStart(2, "0")}</span>
+      <span style={{ color:  GOLD }}>{String(idx + 1).padStart(2, "0")}</span>
       <span style={{ opacity: 0.3, margin: "0 2px" }}>/</span>
       {String(total).padStart(2, "0")}
     </div>
@@ -497,7 +498,7 @@ function HeroPanel({
                   letterSpacing: "0.45em",
                   fontWeight: 700,
                   textTransform: "uppercase" as const,
-                  color: projectTheme.text,
+                      color: "rgba(255,255,255,0.85)",
                   marginBottom: "8px",
                   marginTop: 0,
                 }}
@@ -541,7 +542,7 @@ function HeroPanel({
                         width: "4px",
                         height: "4px",
                         borderRadius: "50%",
-                        backgroundColor: accent,
+                        backgroundColor: "white",
                         opacity: 0.7,
                         flexShrink: 0,
                         display: "inline-block",

@@ -497,7 +497,7 @@ function HeroPanel({
                   letterSpacing: "0.45em",
                   fontWeight: 700,
                   textTransform: "uppercase" as const,
-                  color: accent,
+                  color: projectTheme.text,
                   marginBottom: "8px",
                   marginTop: 0,
                 }}
@@ -508,7 +508,7 @@ function HeroPanel({
                 style={{
                   width: "36px",
                   height: "1px",
-                  backgroundColor: hexToRgba(accent, 0.35),
+                  backgroundColor: hexToRgba(projectTheme.text, 0.35),
                   marginBottom: "12px",
                 }}
               />
@@ -823,7 +823,7 @@ function OffersPanel({
       >
         {/* Header */}
         <div style={{ padding: "26px 30px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+          {/* <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
             <span
               style={{
                 width: "6px",
@@ -845,10 +845,10 @@ function OffersPanel({
             >
               {String(panelIdx + 1).padStart(2, "0")} — Strategic Offers
             </span>
-          </div>
+          </div> */}
 
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "16px" }}>
-            <h3
+            {/* <h3
               style={{
                 fontFamily: "var(--font-serif), Georgia, serif",
                 fontSize: "2.2rem",
@@ -860,7 +860,7 @@ function OffersPanel({
               }}
             >
               Engagement Matrix
-            </h3>
+            </h3> */}
 
             {/* Legend */}
             <div style={{ display: "flex", alignItems: "center", gap: "14px", paddingBottom: "6px" }}>

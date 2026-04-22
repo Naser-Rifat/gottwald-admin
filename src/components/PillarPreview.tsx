@@ -263,6 +263,7 @@ function PanelCounter({
   light?: boolean;
   accentHex?: string;
 }) {
+  const active = accentHex || GOLD;
   return (
     <div
       style={{
@@ -274,13 +275,13 @@ function PanelCounter({
         letterSpacing: "0.25em",
         textTransform: "uppercase" as const,
         fontWeight: 500,
-        // color: light ? TXT_DARK_MUTED : TXT_MUTED,
+        color: light ? TXT_DARK_MUTED : TXT_MUTED,
         display: "flex",
         alignItems: "center",
         gap: "4px",
       }}
     >
-      <span style={{ color:  GOLD }}>{String(idx + 1).padStart(2, "0")}</span>
+      <span style={{ color: active }}>{String(idx + 1).padStart(2, "0")}</span>
       <span style={{ opacity: 0.3, margin: "0 2px" }}>/</span>
       {String(total).padStart(2, "0")}
     </div>
@@ -335,9 +336,14 @@ function TopNav({ tags, accentHex }: { tags: string[]; accentHex?: string }) {
             fontSize: "9px",
             letterSpacing: "0.25em",
             textTransform: "uppercase" as const,
-            fontWeight: 500,
-            color: accentHex || GOLD,
-            opacity: 0.8,
+            fontWeight: 700,
+            color: TXT_LIGHT,
+            backgroundColor: hexToRgba(accentHex || GOLD, 0.12),
+            border: `1px solid ${hexToRgba(accentHex || GOLD, 0.25)}`,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+            backdropFilter: "blur(10px)",
+            padding: "8px 14px",
+            borderRadius: "999px",
           }}
         >
           {tags.join(" · ")}
@@ -362,7 +368,7 @@ function HeroPanel({
   projectTheme: { background: string; text: string; accent: string };
 }) {
   const hasImage = !!data.image;
-  const accent = projectTheme.background || GOLD;
+  const accent = projectTheme.accent || GOLD;
 
   return (
     <div
@@ -494,11 +500,20 @@ function HeroPanel({
             <div style={{ flexShrink: 0, width: "130px", paddingTop: "2px" }}>
               <h3
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  alignSelf: "flex-start",
+                  padding: "8px 10px",
+                  backdropFilter: "blur(10px)",
                   fontSize: "9px",
                   letterSpacing: "0.45em",
                   fontWeight: 700,
                   textTransform: "uppercase" as const,
-                      color: "rgba(255,255,255,0.85)",
+                  color: TXT_LIGHT,
+                  backgroundColor: "rgba(0,0,0,0.42)",
+                  border: `1px solid ${hexToRgba(accent, 0.22)}`,
+                  boxShadow:
+                    "0 10px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.05)",
                   marginBottom: "8px",
                   marginTop: 0,
                 }}
@@ -509,7 +524,7 @@ function HeroPanel({
                 style={{
                   width: "36px",
                   height: "1px",
-                  backgroundColor: hexToRgba(projectTheme.text, 0.35),
+                  backgroundColor: hexToRgba(accent, 0.35),
                   marginBottom: "12px",
                 }}
               />
@@ -542,11 +557,12 @@ function HeroPanel({
                         width: "4px",
                         height: "4px",
                         borderRadius: "50%",
-                        backgroundColor: "white",
-                        opacity: 0.7,
+                        backgroundColor: accent,
+                        opacity: 0.75,
                         flexShrink: 0,
                         display: "inline-block",
                         marginTop: "5px",
+                        boxShadow: `0 0 10px ${hexToRgba(accent, 0.35)}`,
                       }}
                     />
                     {s}

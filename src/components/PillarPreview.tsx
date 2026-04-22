@@ -30,6 +30,12 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function normalizeRichTextHtml(html: string): string {
+  const raw = (html || "").trim();
+  if (!raw) return raw;
+  return raw.includes("\\n") ? raw.replaceAll("\\n", "<br/>") : raw;
+}
+
 // Preview panel dimensions (scaled down from full viewport)
 const PANEL_W = 860;
 const PANEL_H = 540;
@@ -1229,7 +1235,7 @@ function ContentBlockPanel({
                     lineHeight: 1.85,
                     color: hexToRgba(txtHex, 0.8),
                   }}
-                  dangerouslySetInnerHTML={{ __html: block.body }}
+                  dangerouslySetInnerHTML={{ __html: normalizeRichTextHtml(block.body) }}
                 />
               )}
             </div>

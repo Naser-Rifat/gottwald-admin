@@ -26,6 +26,57 @@ const SERVICE_MAX_LENGTH = 60;
 const MAX_SERVICES = 12;
 const MAX_TAGS = 15;
 
+function escapeHtml(text: string) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+/**
+ * If a rich-text block is entered as multiple plain lines (or paragraphs),
+ * normalize it into a semantic <ul><li>…</li></ul> list for clean rendering
+ * on the public site.
+ */
+function normalizeRichTextBodyToList(html: string): string {
+  const raw = (html || "").trim();
+  if (!raw) return raw;
+
+  // If the author already made a list in the editor, keep it.
+  if (/<\s*(ul|ol)\b/i.test(raw)) return raw;
+
+  // Extract list lines from common rich-text HTML outputs (<p>, <br/>).
+  const el = document.createElement("div");
+  el.innerHTML = raw;
+
+  const paragraphLines = Array.from(el.querySelectorAll("p"))
+    .map((p) => (p.textContent || "").trim())
+    .filter(Boolean);
+
+  const textLines =
+    paragraphLines.length > 0
+      ? paragraphLines
+      : (el.innerText || "")
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
+
+  const lines = textLines;
+
+  // Only convert when there is clearly a list-like structure.
+  if (lines.length < 2) return raw;
+
+  // Slightly conservative: require at least one "Stage X" pattern to avoid
+  // turning normal paragraphs into lists.
+  const looksLikeStages = lines.some((l) => /^stage\s+\d+\s*[-–—:]/i.test(l));
+  if (!looksLikeStages) return raw;
+
+  const li = lines.map((l) => `<li>${escapeHtml(l)}</li>`).join("");
+  return `<ul>${li}</ul>`;
+}
+
 // ─── AUTO-RESIZE UTILITY ─────────────────────────────────────────────────────
 
 function autoResizeTextarea(el: HTMLTextAreaElement | null, minHeight = 42) {
@@ -250,6 +301,12 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const watchedLaunchUrl = watch("launchUrl");
   const watchOffers = watch("offers");
 
+  const previewContentBlocks = contentBlocks.map((b) => {
+    if (b.type !== "rich-text") return b;
+    const nextBody = normalizeRichTextBodyToList(b.body || "");
+    return nextBody === (b.body || "") ? b : { ...b, body: nextBody };
+  });
+
   // Register fields once and capture their refs + handlers
   const titleRegistration = register("title");
   const descriptionRegistration = register("description");
@@ -376,11 +433,17 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
     try {
       const imageUrl = imageFile ? "" : data.image || initialData?.image || "";
 
+      const normalizedContentBlocks = contentBlocks.map((b) => {
+        if (b.type !== "rich-text") return b;
+        const nextBody = normalizeRichTextBodyToList(b.body || "");
+        return nextBody === (b.body || "") ? b : { ...b, body: nextBody };
+      });
+
       const pillarData: Pillar = {
         ...data,
         services: cleanedServices,
         image: imageUrl,
-        contentBlocks,
+        contentBlocks: normalizedContentBlocks,
       };
 
       if (mode === "create") {
@@ -746,7 +809,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
               type="button"
               onClick={addTag}
               disabled={tags.length >= MAX_TAGS || !tagInput.trim()}
-              className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-sm text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              className="px-3 py-2 rounded-lg bg-white border border-zinc-700 text-sm text-zinc-700 hover:text-zinc-900 transition-colors disabled:opacity-30 disabled:pointer-events-none"
             >
               Add
             </button>
@@ -811,7 +874,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             type="button"
             onClick={addService}
             disabled={services.length >= MAX_SERVICES}
-            className="flex items-center gap-1.5 mt-2 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            className="flex items-center ml-7 gap-1.5 mt-2 px-3 py-1.5 text-xs font-medium border-2 bg-white rounded border-zinc-100 text-zinc-700 hover:text-zinc-900 transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
             <Plus className="w-3 h-3" />
             Add Service
@@ -909,7 +972,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           launchUrl: watchedLaunchUrl,
           theme,
           offers: (watchOffers as PillarFormValues["offers"]) || [],
-          contentBlocks,
+          contentBlocks: previewContentBlocks,
         }}
         visible={showPreview}
         onToggle={() => setShowPreview((v) => !v)}

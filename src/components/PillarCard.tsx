@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
+
+import type { HTMLAttributes } from "react";
 import type { Pillar } from "../lib/types/pillar";
-import { Pencil, Trash2 } from "lucide-react";
+import { GripVertical, Pencil, Trash2 } from "lucide-react";
 
 interface PillarCardProps {
   pillar: Pillar;
@@ -8,6 +10,9 @@ interface PillarCardProps {
   onDelete: (id: string) => void;
   deleting: boolean;
   variant?: "grid" | "list";
+  /** When provided (list mode only), renders a drag handle wired up to dnd-kit. */
+  dragHandleProps?: HTMLAttributes<HTMLButtonElement>;
+  isDragging?: boolean;
 }
 
 export default function PillarCard({
@@ -16,6 +21,8 @@ export default function PillarCard({
   onDelete,
   deleting,
   variant = "grid",
+  dragHandleProps,
+  isDragging = false,
 }: PillarCardProps) {
   const navigate = useNavigate();
   const id = pillar.id ?? pillar.slug;
@@ -27,8 +34,26 @@ export default function PillarCard({
         tabIndex={0}
         onClick={() => navigate(`/projects/${id}`)}
         onKeyDown={(e) => e.key === "Enter" && navigate(`/projects/${id}`)}
-        className="group flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 transition-all hover:border-zinc-700 hover:bg-zinc-900 cursor-pointer"
+        className={`group flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 transition-all hover:border-zinc-700 hover:bg-zinc-900 cursor-pointer ${
+          isDragging ? "opacity-50 ring-2 ring-zinc-600" : ""
+        }`}
       >
+        {/* Drag handle */}
+        {dragHandleProps && (
+          <button
+            type="button"
+            aria-label="Drag to reorder"
+            {...dragHandleProps}
+            onClick={(e) => {
+              dragHandleProps.onClick?.(e);
+              e.stopPropagation();
+            }}
+            className="shrink-0 flex items-center justify-center w-6 h-6 rounded text-zinc-500 hover:text-zinc-200 cursor-grab active:cursor-grabbing touch-none"
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+        )}
+
         {/* Thumbnail */}
         <div className="shrink-0 w-20 h-20 rounded-lg bg-zinc-800 overflow-hidden">
           {pillar.image ? (

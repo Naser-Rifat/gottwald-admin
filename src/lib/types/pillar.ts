@@ -39,6 +39,7 @@ export interface Pillar {
   contentBlocks: ContentBlock[];
   offers: Offer[];
   theme: PillarTheme;
+  order?: number;
 }
 
 export type CreatePillarPayload = Pillar;

@@ -34,6 +34,7 @@ interface ApiPillar {
   offers?: string | unknown[];
   theme?: string | PillarTheme;
   image?: string;
+  order?: number;
   content_blocks?: ApiContentBlock[];
   content_blocks_data?: ApiContentBlock[];
 }
@@ -135,6 +136,7 @@ function mapApiPillarToPillar(api: ApiPillar): Pillar {
     offers: toOffers(api.offers),
     theme: toTheme(api.theme),
     contentBlocks: blocks,
+    order: api.order ?? 0,
   };
 }
 
@@ -250,8 +252,19 @@ async function apiFetchForm<T>(endpoint: string, method: string, body: FormData)
 export async function getPillars(): Promise<Pillar[]> {
   if (USE_MOCK) return MOCK_PROJECTS;
   const res = await apiFetch<PillarsListResponse>("/api/v1/pillars/");
-  const items = res.data.reverse() ?? [];
-  return items.map(mapApiPillarToPillar);
+  // Backend returns pillars sorted by `order` ascending (then -created_at).
+  // Display in that exact order so DnD reordering is round-trippable.
+  return (res.data ?? []).map(mapApiPillarToPillar);
+}
+
+// ─── REORDER PILLARS ─────────────────────────────────────────────────────────
+
+export async function reorderPillars(ids: string[]): Promise<void> {
+  if (USE_MOCK) return;
+  await apiFetch<void>("/api/v1/pillars/reorder/", {
+    method: "POST",
+    body: JSON.stringify({ ids }),
+  });
 }
 
 // ─── GET SINGLE PILLAR ───────────────────────────────────────────────────────

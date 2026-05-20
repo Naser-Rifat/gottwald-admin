@@ -4,7 +4,10 @@ import { Plus } from "lucide-react";
 import type { Pillar } from "../lib/types/pillar";
 import { getPillars, deletePillar } from "../lib/api/pillar";
 import PillarCard from "../components/PillarCard";
+import ViewToggle, { type ViewMode } from "../components/ViewToggle";
 import { toast } from "sonner";
+
+const VIEW_MODE_KEY = "gottwald_admin_pillars_view";
 
 export default function PillarsList() {
   const navigate = useNavigate();
@@ -12,6 +15,14 @@ export default function PillarsList() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    () => (localStorage.getItem(VIEW_MODE_KEY) as ViewMode) || "grid",
+  );
+
+  const handleViewChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  };
 
   useEffect(() => {
     loadProjects();
@@ -87,13 +98,16 @@ export default function PillarsList() {
             {pillars.length} pillar{pillars.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={() => navigate("/projects/new")}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-semibold hover:bg-white transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Pillar
-        </button>
+        <div className="flex items-center gap-3">
+          <ViewToggle value={viewMode} onChange={handleViewChange} />
+          <button
+            onClick={() => navigate("/projects/new")}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-semibold hover:bg-white transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Pillar
+          </button>
+        </div>
       </div>
 
       {pillars.length === 0 ? (
@@ -115,7 +129,13 @@ export default function PillarsList() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              : "flex flex-col gap-3"
+          }
+        >
           {pillars.map((pillar) => (
             <div key={pillar.id ?? pillar.slug} className="relative">
               <PillarCard
@@ -123,6 +143,7 @@ export default function PillarsList() {
                 onEdit={(id) => navigate(`/projects/${id}`)}
                 onDelete={handleDelete}
                 deleting={deletingId === (pillar.id ?? pillar.slug)}
+                variant={viewMode}
               />
               {/* Confirm Delete Overlay */}
               {confirmDelete === (pillar.id ?? pillar.slug) && (

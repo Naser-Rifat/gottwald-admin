@@ -7,6 +7,7 @@ interface PillarCardProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   deleting: boolean;
+  variant?: "grid" | "list";
 }
 
 export default function PillarCard({
@@ -14,9 +15,90 @@ export default function PillarCard({
   onEdit,
   onDelete,
   deleting,
+  variant = "grid",
 }: PillarCardProps) {
   const navigate = useNavigate();
   const id = pillar.id ?? pillar.slug;
+
+  if (variant === "list") {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate(`/projects/${id}`)}
+        onKeyDown={(e) => e.key === "Enter" && navigate(`/projects/${id}`)}
+        className="group flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 transition-all hover:border-zinc-700 hover:bg-zinc-900 cursor-pointer"
+      >
+        {/* Thumbnail */}
+        <div className="shrink-0 w-20 h-20 rounded-lg bg-zinc-800 overflow-hidden">
+          {pillar.image ? (
+            <img
+              src={pillar.image}
+              alt={pillar.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-zinc-600 text-[10px]">
+              No Image
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1.5">
+            <h3 className="text-sm font-semibold text-zinc-100 truncate">
+              {pillar.title}
+            </h3>
+            <span className="shrink-0 px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-zinc-400">
+              {pillar.slug}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {pillar.tags.slice(0, 4).map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-0.5 rounded-full bg-zinc-800/80 text-[10px] font-medium text-zinc-400 uppercase tracking-wider"
+              >
+                {tag}
+              </span>
+            ))}
+            {pillar.tags.length > 4 && (
+              <span className="px-2 py-0.5 text-[10px] text-zinc-500">
+                +{pillar.tags.length - 4}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div
+          className="shrink-0 flex items-center gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => onEdit(id)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors"
+          >
+            <Pencil className="w-3 h-3" />
+            Edit
+          </button>
+          <button
+            onClick={() => onDelete(id)}
+            disabled={deleting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-red-400 bg-zinc-800 hover:bg-red-950/50 hover:text-red-300 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {deleting ? (
+              <span className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
+            ) : (
+              <Trash2 className="w-3 h-3" />
+            )}
+            Delete
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -43,11 +125,13 @@ export default function PillarCard({
 
       {/* Content */}
       <div className="p-4 space-y-3">
-        <div className="flex flex-col gap-2 items-start w-full">
-          <h3 className="text-sm font-semibold text-zinc-100 leading-tight line-clamp-2">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-sm font-semibold text-zinc-100 leading-tight">
             {pillar.title}
           </h3>
-      
+          <span className="shrink-0 px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-zinc-400">
+            {pillar.slug}
+          </span>
         </div>
 
         {/* Tags */}

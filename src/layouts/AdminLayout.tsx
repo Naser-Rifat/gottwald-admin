@@ -52,7 +52,7 @@ export default function AdminLayout() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-scroll" style={{ scrollbarGutter: "stable" }}>
         <div className="mx-auto max-w-6xl px-6 py-8">
           <Suspense
             fallback={

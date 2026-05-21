@@ -100,10 +100,11 @@ const VALID_CURRENCIES = ["EUR", "USD", "CHF", "GBP", "GEL"] as const;
 function normalizeOffer(o: unknown): Pillar["offers"][number] {
   const obj = o as Record<string, unknown>;
   const rawPrice = obj.price;
-  const price =
-    rawPrice !== null && rawPrice !== undefined && rawPrice !== ""
-      ? Number(rawPrice)
-      : null;
+  let price: number | null = null;
+  if (rawPrice !== null && rawPrice !== undefined && rawPrice !== "") {
+    const n = Number(rawPrice);
+    price = Number.isFinite(n) ? (n % 1 === 0 ? Math.trunc(n) : n) : null;
+  }
   const rawCurrency = String(obj.currency ?? "").toUpperCase();
   const currency = (VALID_CURRENCIES as readonly string[]).includes(rawCurrency)
     ? (rawCurrency as Pillar["offers"][number]["currency"])

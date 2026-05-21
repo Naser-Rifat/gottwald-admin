@@ -74,25 +74,30 @@ function SortableRow({
         isDragging={isDragging}
       />
       {confirmDelete === key && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 z-10">
-          <p className="text-sm font-medium text-zinc-200">Delete this pillar?</p>
-          <p className="text-xs text-zinc-400">This action cannot be undone.</p>
-          <div className="flex items-center gap-2 mt-2">
+        <div className="absolute inset-0 bg-black/85 backdrop-blur-md rounded-xl flex flex-col items-center justify-center gap-2 z-10 px-6">
+          <div className="h-px w-8 bg-red-500/40 mb-1" />
+          <p className="font-brand text-base text-zinc-100 uppercase">
+            Delete pillar
+          </p>
+          <p className="text-xs text-zinc-400 text-center">
+            This action cannot be undone.
+          </p>
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              onClick={() => setConfirmDelete(null)}
+              className="px-4 py-2 rounded-lg border border-zinc-700 bg-transparent text-zinc-300 text-xs font-medium uppercase tracking-wide hover:bg-zinc-900 hover:border-zinc-600 transition-all"
+            >
+              Cancel
+            </button>
             <button
               onClick={() => handleDelete(key)}
               disabled={deletingId === key}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-500 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold uppercase tracking-wide hover:bg-red-500 disabled:opacity-50 transition-all shadow-lg shadow-red-900/30"
             >
               {deletingId === key && (
                 <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               )}
-              Confirm Delete
-            </button>
-            <button
-              onClick={() => setConfirmDelete(null)}
-              className="px-4 py-2 rounded-lg border border-zinc-600 text-zinc-300 text-xs font-medium hover:bg-zinc-800 transition-colors"
-            >
-              Cancel
+              Confirm
             </button>
           </div>
         </div>
@@ -214,10 +219,13 @@ export default function PillarsList() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Pillars</h1>
-          <p className="text-sm text-zinc-500 mt-1">
+      <div className="flex items-end justify-between mb-10">
+        <div className="heading-underline">
+          <p className="heading-eyebrow">Content · Index</p>
+          <h1 className="font-brand text-3xl text-zinc-50 uppercase">
+            Pillars
+          </h1>
+          <p className="text-xs text-zinc-500 mt-3 tracking-wide">
             {pillars.length} pillar{pillars.length !== 1 ? "s" : ""}
             {viewMode === "list" && pillars.length > 1 && (
               <span className="ml-2 text-zinc-600">· drag to reorder</span>
@@ -228,7 +236,7 @@ export default function PillarsList() {
           <ViewToggle value={viewMode} onChange={handleViewChange} />
           <button
             onClick={() => navigate("/projects/new")}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-semibold hover:bg-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gold text-zinc-950 text-sm font-semibold uppercase tracking-wide hover:bg-gold-hover transition-all shadow-lg shadow-gold/10"
           >
             <Plus className="w-4 h-4" />
             Add Pillar
@@ -237,19 +245,23 @@ export default function PillarsList() {
       </div>
 
       {pillars.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
-            <Plus className="w-8 h-8 text-zinc-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-zinc-300">No pillars yet</h3>
-          <p className="text-sm text-zinc-500 mt-1 mb-6">
-            Create your first pillar to get started.
+        <div className="text-center py-24">
+          <p className="font-brand text-7xl text-gold/15 leading-none mb-6 select-none">
+            &mdash;
+          </p>
+          <p className="heading-eyebrow text-gold-dim">Empty</p>
+          <h3 className="font-brand text-2xl text-zinc-100 uppercase mt-1">
+            Your pillars will live here.
+          </h3>
+          <p className="text-sm text-zinc-500 mt-3 mb-8 max-w-sm mx-auto leading-relaxed">
+            Create a strategic pillar to begin shaping the public catalogue.
           </p>
           <button
             onClick={() => navigate("/projects/new")}
-            className="px-5 py-2.5 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium hover:bg-zinc-700 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gold text-zinc-950 text-xs font-semibold uppercase tracking-[0.2em] hover:bg-gold-hover transition-all shadow-lg shadow-gold/15"
           >
-            Create Pillar
+            <Plus className="w-4 h-4" />
+            Create the first pillar
           </button>
         </div>
       ) : viewMode === "list" ? (
@@ -296,29 +308,30 @@ export default function PillarsList() {
                   variant="grid"
                 />
                 {confirmDelete === key && (
-                  <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-3 z-10">
-                    <p className="text-sm font-medium text-zinc-200">
-                      Delete this pillar?
+                  <div className="absolute inset-0 bg-black/85 backdrop-blur-md rounded-xl flex flex-col items-center justify-center gap-2 z-10 px-6">
+                    <div className="h-px w-8 bg-red-500/40 mb-1" />
+                    <p className="font-brand text-base text-zinc-100 uppercase">
+                      Delete pillar
                     </p>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-zinc-400 text-center">
                       This action cannot be undone.
                     </p>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2 mt-3">
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="px-4 py-2 rounded-lg border border-zinc-700 bg-transparent text-zinc-300 text-xs font-medium uppercase tracking-wide hover:bg-zinc-900 hover:border-zinc-600 transition-all"
+                      >
+                        Cancel
+                      </button>
                       <button
                         onClick={() => handleDelete(key)}
                         disabled={deletingId === key}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-500 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold uppercase tracking-wide hover:bg-red-500 disabled:opacity-50 transition-all shadow-lg shadow-red-900/30"
                       >
                         {deletingId === key && (
                           <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         )}
-                        Confirm Delete
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(null)}
-                        className="px-4 py-2 rounded-lg border border-zinc-600 text-zinc-300 text-xs font-medium hover:bg-zinc-800 transition-colors"
-                      >
-                        Cancel
+                        Confirm
                       </button>
                     </div>
                   </div>

@@ -9,12 +9,15 @@ export default function PillarNew() {
     <div>
       <button
         onClick={() => navigate("/projects")}
-        className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors mb-6"
+        className="group flex items-center gap-2 text-[11px] text-zinc-500 hover:text-gold transition-colors mb-8 uppercase tracking-[0.2em]"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
         Back to Pillars
       </button>
-      <h1 className="text-2xl font-bold text-zinc-100 mb-8">New Pillar</h1>
+      <div className="heading-underline mb-10">
+        <p className="heading-eyebrow">Content · New</p>
+        <h1 className="font-brand text-3xl text-zinc-50 uppercase">New Pillar</h1>
+      </div>
       <ProjectForm mode="create" />
     </div>
   );

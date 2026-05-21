@@ -21,6 +21,13 @@
   --color-input: #27272a;
   --color-ring: #d4d4d8;
   --radius: 0.5rem;
+
+  /* Brand accent — mirrors public site (gottwald.world) gold token */
+  --color-gold: #c9a84c;
+  --color-gold-hover: #d4b66f;
+  --color-gold-dim: #8a7335;
+
+  --font-brand: "Cinzel", "Cormorant Garamond", "Times New Roman", serif;
 }
 
 * {
@@ -34,6 +41,105 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.font-brand {
+  font-family: var(--font-brand);
+  font-feature-settings: "ss01" on, "kern" on;
+  letter-spacing: 0.08em;
+}
+
+/* ─── Atmospheric depth ─────────────────────────────────────────────────── */
+
+/* Film grain — applied as a fixed overlay, opacity tuned for taste */
+.bg-grain {
+  position: relative;
+}
+.bg-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  z-index: 100;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Card top-edge highlight — brushed-metal feel */
+.edge-highlight {
+  position: relative;
+}
+.edge-highlight::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.06) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Custom scrollbar — thin, dim, gold thumb on hover */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2e #09090b;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #2a2a2e;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-gold-dim);
+}
+
+/* Page transition — applied to route content */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-fade-in {
+  animation: pageFadeIn 220ms ease-out;
+}
+
+/* Section eyebrow + heading + gold underline */
+.heading-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-gold-dim);
+  margin-bottom: 0.5rem;
+}
+.heading-underline::after {
+  content: "";
+  display: block;
+  height: 2px;
+  width: 32px;
+  background: var(--color-gold);
+  margin-top: 0.75rem;
 }
 
 /* Chrome, Safari, Edge, Opera */

@@ -69,25 +69,36 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="relative min-h-screen bg-zinc-950 flex items-center justify-center p-4 overflow-hidden">
+      {/* Ambient gold glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.18]"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.35), transparent 70%)",
+        }}
+      />
+
+      <div className="relative w-full max-w-sm">
         {/* Card */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-2xl shadow-black/40">
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/70 p-8 shadow-2xl shadow-black/50 backdrop-blur-sm">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-12 h-12 flex items-center justify-center mx-auto mb-4">
+            <div className="mx-auto mb-5 inline-flex items-center justify-center">
               <img
-                className="mx-auto"
-                height={100}
-                width={100}
+                height={72}
+                width={72}
                 src="/logo.png"
                 alt="GOTT WALD"
+                className="rounded-full ring-1 ring-gold/40 shadow-lg shadow-black/40"
               />
             </div>
-            <h1 className="text-xl font-black tracking-wider text-[#C9A84C] uppercase">
-              GOTT WALD
+            <h1 className="font-brand text-2xl text-gold uppercase">
+              Gott Wald
             </h1>
-            <p className="text-xs text-zinc-500 mt-1 tracking-widest uppercase">
+            <div className="mx-auto mt-3 h-px w-12 bg-gold/40" />
+            <p className="text-[10px] text-zinc-500 mt-3 tracking-[0.3em] uppercase">
               Admin Panel
             </p>
           </div>
@@ -98,7 +109,7 @@ export default function Login() {
             <div>
               <label
                 htmlFor="login-email"
-                className="text-xs font-medium text-zinc-400 mb-1.5 block uppercase tracking-wider"
+                className="text-[10px] font-medium text-zinc-400 mb-1.5 block uppercase tracking-[0.2em]"
               >
                 Email
               </label>
@@ -109,10 +120,10 @@ export default function Login() {
                 autoComplete="email"
                 autoFocus
                 placeholder="admin@gottwald.com"
-                className={`w-full px-3.5 py-2.5 rounded-lg bg-zinc-800 border text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
+                className={`w-full px-3.5 py-2.5 rounded-lg bg-zinc-950/60 border text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
                   errors.email
                     ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/20"
-                    : "border-zinc-700 focus:border-zinc-500 focus:ring-zinc-500/20"
+                    : "border-zinc-800 focus:border-gold/60 focus:ring-gold/20"
                 }`}
               />
               {errors.email && (
@@ -124,7 +135,7 @@ export default function Login() {
             <div>
               <label
                 htmlFor="login-password"
-                className="text-xs font-medium text-zinc-400 mb-1.5 block uppercase tracking-wider"
+                className="text-[10px] font-medium text-zinc-400 mb-1.5 block uppercase tracking-[0.2em]"
               >
                 Password
               </label>
@@ -135,10 +146,10 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className={`w-full px-3.5 py-2.5 pr-11 rounded-lg bg-zinc-800 border text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
+                  className={`w-full px-3.5 py-2.5 pr-11 rounded-lg bg-zinc-950/60 border text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
                     errors.password
                       ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/20"
-                      : "border-zinc-700 focus:border-zinc-500 focus:ring-zinc-500/20"
+                      : "border-zinc-800 focus:border-gold/60 focus:ring-gold/20"
                   }`}
                 />
                 {/* Show / Hide toggle */}
@@ -147,7 +158,7 @@ export default function Login() {
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-gold transition-colors focus:outline-none"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -172,12 +183,12 @@ export default function Login() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-semibold hover:bg-white transition-colors disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gold text-zinc-950 text-sm font-semibold uppercase tracking-[0.15em] hover:bg-gold-hover focus:outline-none focus:ring-2 focus:ring-gold/40 transition-all disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-gold/10"
             >
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Signing in...
+                  Signing in
                 </>
               ) : (
                 "Sign In"
@@ -187,8 +198,8 @@ export default function Login() {
 
           {/* Mock hint */}
           {import.meta.env.VITE_DATA_SOURCE === "mock" && (
-            <div className="mt-6 pt-4 border-t border-zinc-800 text-center">
-              <p className="text-[10px] text-zinc-600 uppercase tracking-widest">
+            <div className="mt-6 pt-4 border-t border-zinc-800/80 text-center">
+              <p className="text-[10px] text-zinc-600 uppercase tracking-[0.25em]">
                 Mock Mode
               </p>
               <p className="text-[11px] text-zinc-500 mt-1 font-mono">
@@ -197,6 +208,11 @@ export default function Login() {
             </div>
           )}
         </div>
+
+        {/* Footer mark */}
+        <p className="mt-6 text-center text-[10px] text-zinc-700 uppercase tracking-[0.3em]">
+          GOTT WALD Holding LLC
+        </p>
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ export default function App() {
             <Suspense
               fallback={
                 <div className="flex items-center justify-center h-screen bg-zinc-950">
-                  <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-gold animate-spin" />
                 </div>
               }
             >
@@ -39,7 +39,23 @@ export default function App() {
           </Route>
         </Route>
       </Routes>
-      <Toaster theme="dark" position="bottom-right" richColors />
+      <Toaster
+        theme="dark"
+        position="bottom-right"
+        toastOptions={{
+          classNames: {
+            toast:
+              "!bg-zinc-950 !border !border-zinc-800/80 !shadow-2xl !shadow-black/50 !rounded-xl !font-sans",
+            title:
+              "!font-brand !text-zinc-100 !text-sm !uppercase !tracking-wide",
+            description: "!text-zinc-400 !text-xs !mt-0.5",
+            success:
+              "!border-l-2 !border-l-[#c9a84c] !text-zinc-100",
+            error: "!border-l-2 !border-l-red-500 !text-zinc-100",
+            info: "!border-l-2 !border-l-zinc-600 !text-zinc-100",
+          },
+        }}
+      />
     </AuthProvider>
   );
 }

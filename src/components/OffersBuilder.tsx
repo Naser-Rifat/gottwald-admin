@@ -56,15 +56,17 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-zinc-300">Offers</label>
+        <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">Offers</label>
         <span className="text-xs text-zinc-500">
           {offers.length} offer{offers.length !== 1 ? "s" : ""}
         </span>
       </div>
 
       {offers.length === 0 && (
-        <div className="border border-dashed border-zinc-700 rounded-lg p-8 text-center text-zinc-500 text-sm">
-          No offers yet. Add one below.
+        <div className="border border-dashed border-zinc-800/60 rounded-xl p-10 text-center">
+          <p className="text-2xl text-zinc-800 font-brand mb-2">—</p>
+          <p className="text-[11px] font-medium text-zinc-600 uppercase tracking-[0.2em]">No offers configured</p>
+          <p className="text-[11px] text-zinc-700 mt-1">Add a service tier to display on the pillar page.</p>
         </div>
       )}
 
@@ -75,9 +77,23 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800">
-            <span className="text-xs font-mono text-zinc-500">
-              #{index + 1}
-            </span>
+            <div className="flex items-center gap-2.5">
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{
+                  backgroundColor:
+                    offer.tier === "gold" ? "#c9a84c"
+                    : offer.tier === "silver" ? "#9ca3af"
+                    : "#b87333",
+                }}
+              />
+              <span className="text-xs font-medium text-zinc-400 truncate max-w-45">
+                {offer.title || <span className="text-zinc-600 italic">Untitled offer</span>}
+              </span>
+              <span className="text-[9px] font-medium uppercase tracking-[0.15em] text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5">
+                {offer.tier}
+              </span>
+            </div>
             <div className="flex items-center gap-1">
               <button
                 type="button"
@@ -112,7 +128,7 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
           <div className="p-4 space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+                <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                   Title
                 </label>
                 <input
@@ -122,11 +138,11 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                     updateOffer(index, { title: e.target.value })
                   }
                   placeholder="e.g. Strategic Assessment"
-                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+                <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                   Tier
                 </label>
                 <select
@@ -136,7 +152,7 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                       tier: e.target.value as "copper" | "silver" | "gold",
                     })
                   }
-                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 focus:outline-none focus:border-gold/50 transition-colors"
                 >
                   <option value="copper">Copper</option>
                   <option value="silver">Silver</option>
@@ -146,7 +162,7 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+              <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                 Description
               </label>
               <textarea
@@ -156,12 +172,12 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                 }
                 placeholder="A focused strategy audit..."
                 rows={2}
-                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-y"
+                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 transition-colors resize-y"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+              <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                 Deliverable
               </label>
               <textarea
@@ -171,14 +187,14 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                 }
                 placeholder="Strategic assessment report + executive summary"
                 rows={2}
-                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-y"
+                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 transition-colors resize-y"
               />
             </div>
 
             {/* Pricing row — leave price empty for "Contact for quote" */}
             <div className="grid grid-cols-[1fr_auto] gap-3">
               <div>
-                <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+                <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                   Price{" "}
                   <span className="text-zinc-600 normal-case tracking-normal">
                     (optional — leave empty for "Contact for quote")
@@ -198,11 +214,11 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                   }}
                   onWheel={(e) => e.currentTarget.blur()}
                   placeholder="e.g. 1500"
-                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+                <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                   Currency
                 </label>
                 <select
@@ -212,7 +228,7 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                       currency: e.target.value as OfferCurrency,
                     })
                   }
-                  className="px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 transition-colors"
+                  className="px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 focus:outline-none focus:border-gold/50 transition-colors"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -229,9 +245,9 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
       <button
         type="button"
         onClick={addOffer}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-dashed border-zinc-700 text-sm font-medium text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-zinc-700/80 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500 hover:text-gold hover:border-gold/40 transition-colors"
       >
-        <Plus className="w-4 h-4" />
+        <Plus className="w-3.5 h-3.5" />
         Add Offer
       </button>
     </div>

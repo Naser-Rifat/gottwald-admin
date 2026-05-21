@@ -2,7 +2,27 @@ import { useNavigate } from "react-router-dom";
 
 import type { HTMLAttributes } from "react";
 import type { Pillar } from "../lib/types/pillar";
-import { GripVertical, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+
+function DragDots({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="10"
+      height="14"
+      viewBox="0 0 10 14"
+      fill="currentColor"
+      aria-hidden
+      className={className}
+    >
+      <circle cx="2" cy="2" r="1.1" />
+      <circle cx="8" cy="2" r="1.1" />
+      <circle cx="2" cy="7" r="1.1" />
+      <circle cx="8" cy="7" r="1.1" />
+      <circle cx="2" cy="12" r="1.1" />
+      <circle cx="8" cy="12" r="1.1" />
+    </svg>
+  );
+}
 
 interface PillarCardProps {
   pillar: Pillar;
@@ -34,7 +54,7 @@ export default function PillarCard({
         tabIndex={0}
         onClick={() => navigate(`/projects/${id}`)}
         onKeyDown={(e) => e.key === "Enter" && navigate(`/projects/${id}`)}
-        className={`group flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 transition-all hover:border-zinc-700 hover:bg-zinc-900 cursor-pointer ${
+        className={`group flex items-center gap-3 edge-highlight rounded-xl border border-zinc-800/70 bg-zinc-900/50 p-3 transition-all hover:border-gold/40 hover:bg-zinc-900 hover:shadow-lg hover:shadow-gold/5 cursor-pointer ${
           isDragging ? "opacity-50 ring-2 ring-zinc-600" : ""
         }`}
       >
@@ -48,9 +68,9 @@ export default function PillarCard({
               dragHandleProps.onClick?.(e);
               e.stopPropagation();
             }}
-            className="shrink-0 flex items-center justify-center w-6 h-6 rounded text-zinc-500 hover:text-zinc-200 cursor-grab active:cursor-grabbing touch-none"
+            className="shrink-0 flex items-center justify-center w-6 h-6 rounded text-zinc-600 hover:text-gold cursor-grab active:cursor-grabbing touch-none transition-colors"
           >
-            <GripVertical className="w-4 h-4" />
+            <DragDots />
           </button>
         )}
 
@@ -75,7 +95,7 @@ export default function PillarCard({
             <h3 className="text-sm font-semibold text-zinc-100 truncate">
               {pillar.title}
             </h3>
-            <span className="shrink-0 px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-zinc-400">
+            <span className="shrink-0 px-2 py-0.5 rounded-md border border-zinc-800/80 text-[10px] font-mono text-zinc-500 tracking-wide">
               {pillar.slug}
             </span>
           </div>
@@ -83,7 +103,7 @@ export default function PillarCard({
             {pillar.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded-full bg-zinc-800/80 text-[10px] font-medium text-zinc-400 uppercase tracking-wider"
+                className="px-2 py-0.5 rounded-full border border-zinc-800/60 text-[9px] font-medium text-zinc-500 uppercase tracking-[0.15em]"
               >
                 {tag}
               </span>
@@ -103,22 +123,26 @@ export default function PillarCard({
         >
           <button
             onClick={() => onEdit(id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors"
+            className="group flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-medium text-zinc-400 hover:text-gold transition-colors uppercase tracking-[0.18em]"
           >
             <Pencil className="w-3 h-3" />
-            Edit
+            <span className="border-b border-transparent group-hover:border-gold/40 pb-px transition-colors">
+              Edit
+            </span>
           </button>
           <button
             onClick={() => onDelete(id)}
             disabled={deleting}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-red-400 bg-zinc-800 hover:bg-red-950/50 hover:text-red-300 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+            className="group flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-medium text-zinc-500 hover:text-red-400 transition-colors uppercase tracking-[0.18em] disabled:opacity-50 disabled:pointer-events-none"
           >
             {deleting ? (
               <span className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
             ) : (
               <Trash2 className="w-3 h-3" />
             )}
-            Delete
+            <span className="border-b border-transparent group-hover:border-red-400/40 pb-px transition-colors">
+              Delete
+            </span>
           </button>
         </div>
       </div>
@@ -131,7 +155,7 @@ export default function PillarCard({
       tabIndex={0}
       onClick={() => navigate(`/projects/${id}`)}
       onKeyDown={(e) => e.key === "Enter" && navigate(`/projects/${id}`)}
-      className="group relative rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden transition-all hover:border-zinc-700 hover:bg-zinc-900 cursor-pointer"
+      className="group relative edge-highlight rounded-xl border border-zinc-800/70 bg-zinc-900/50 overflow-hidden transition-all hover:border-gold/40 hover:bg-zinc-900 hover:shadow-lg hover:shadow-gold/5 cursor-pointer"
     >
       {/* Cover Image */}
       <div className="aspect-video bg-zinc-800 overflow-hidden">
@@ -154,7 +178,7 @@ export default function PillarCard({
           <h3 className="text-sm font-semibold text-zinc-100 leading-tight">
             {pillar.title}
           </h3>
-          <span className="shrink-0 px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-zinc-400">
+          <span className="shrink-0 px-2 py-0.5 rounded-md border border-zinc-800/80 text-[10px] font-mono text-zinc-500 tracking-wide">
             {pillar.slug}
           </span>
         </div>
@@ -164,7 +188,7 @@ export default function PillarCard({
           {pillar.tags.map((tag) => (
             <span
               key={tag}
-              className="px-2 py-0.5 rounded-full bg-zinc-800/80 text-[10px] font-medium text-zinc-400 uppercase tracking-wider"
+              className="px-2 py-0.5 rounded-full border border-zinc-800/60 text-[9px] font-medium text-zinc-500 uppercase tracking-[0.15em]"
             >
               {tag}
             </span>
@@ -178,22 +202,26 @@ export default function PillarCard({
         >
           <button
             onClick={() => onEdit(id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors"
+            className="group flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-medium text-zinc-400 hover:text-gold transition-colors uppercase tracking-[0.18em]"
           >
             <Pencil className="w-3 h-3" />
-            Edit
+            <span className="border-b border-transparent group-hover:border-gold/40 pb-px transition-colors">
+              Edit
+            </span>
           </button>
           <button
             onClick={() => onDelete(id)}
             disabled={deleting}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-red-400 bg-zinc-800 hover:bg-red-950/50 hover:text-red-300 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+            className="group flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-medium text-zinc-500 hover:text-red-400 transition-colors uppercase tracking-[0.18em] disabled:opacity-50 disabled:pointer-events-none"
           >
             {deleting ? (
               <span className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
             ) : (
               <Trash2 className="w-3 h-3" />
             )}
-            Delete
+            <span className="border-b border-transparent group-hover:border-red-400/40 pb-px transition-colors">
+              Delete
+            </span>
           </button>
         </div>
       </div>

@@ -34,24 +34,26 @@ export default function PillarEdit() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+        <Loader2 className="w-6 h-6 text-gold animate-spin" />
       </div>
     );
   }
 
   if (!id || !pillar) {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-lg font-semibold text-zinc-300">
-          Pillar not found
+      <div className="text-center py-24">
+        <p className="heading-eyebrow text-gold-dim">Not found</p>
+        <h2 className="font-brand text-2xl text-zinc-100 uppercase mt-1">
+          This pillar no longer exists.
         </h2>
-        <p className="text-sm text-zinc-500 mt-1 mb-6">
-          The pillar does not exist.
+        <p className="text-sm text-zinc-500 mt-3 mb-8 max-w-sm mx-auto leading-relaxed">
+          It may have been deleted, or the link is incorrect.
         </p>
         <button
           onClick={() => navigate("/projects")}
-          className="px-5 py-2.5 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium hover:bg-zinc-700 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-zinc-700 text-zinc-300 text-xs font-medium uppercase tracking-[0.2em] hover:border-gold/40 hover:text-gold transition-all"
         >
+          <ArrowLeft className="w-3.5 h-3.5" />
           Back to Pillars
         </button>
       </div>
@@ -62,13 +64,20 @@ export default function PillarEdit() {
     <div>
       <button
         onClick={() => navigate("/projects")}
-        className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors mb-6"
+        className="group flex items-center gap-2 text-[11px] text-zinc-500 hover:text-gold transition-colors mb-8 uppercase tracking-[0.2em]"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
         Back to Pillars
       </button>
-      <h1 className="text-2xl font-bold text-zinc-100 mb-2">Edit Pillar</h1>
-      <p className="text-sm text-zinc-500 mb-8 font-mono">{pillar.slug}</p>
+      <div className="heading-underline mb-10">
+        <p className="heading-eyebrow">Content · Edit</p>
+        <h1 className="font-brand text-3xl text-zinc-50 uppercase">
+          Edit Pillar
+        </h1>
+        <p className="text-[11px] text-zinc-500 mt-3 font-mono tracking-wide">
+          gottwald.world/pillars/<span className="text-zinc-300">{pillar.slug}</span>
+        </p>
+      </div>
       <PillarForm mode="edit" initialData={pillar} />
     </div>
   );

@@ -9,7 +9,6 @@ import {
   Sun,
   Moon,
   ImagePlus,
-  X,
   AlertTriangle,
 } from "lucide-react";
 import { validateImage, DEFAULT_IMAGE_CONFIG } from "../lib/utils/image-validation";
@@ -104,7 +103,7 @@ export default function ContentBlockBuilder({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-zinc-300">
+        <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">
           Content Blocks
         </label>
         <span className="text-xs text-zinc-500">
@@ -113,8 +112,10 @@ export default function ContentBlockBuilder({
       </div>
 
       {blocks.length === 0 && (
-        <div className="border border-dashed border-zinc-700 rounded-lg p-8 text-center text-zinc-500 text-sm">
-          No content blocks yet. Add one below.
+        <div className="border border-dashed border-zinc-800/60 rounded-xl p-10 text-center">
+          <p className="text-2xl text-zinc-800 font-brand mb-2">—</p>
+          <p className="text-[11px] font-medium text-zinc-600 uppercase tracking-[0.2em]">No content blocks</p>
+          <p className="text-[11px] text-zinc-700 mt-1">Add scrollable panels that appear after the hero section.</p>
         </div>
       )}
 
@@ -125,18 +126,19 @@ export default function ContentBlockBuilder({
         >
           {/* Block Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-zinc-500">
-                #{index + 1}
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-mono text-zinc-600">#{index + 1}</span>
+              <span className="text-xs text-zinc-400 truncate max-w-40">
+                {block.heading || <span className="italic text-zinc-600">Untitled block</span>}
               </span>
-              <div className="flex items-center rounded-md overflow-hidden border border-zinc-700">
+              <div className="flex items-center rounded-md overflow-hidden border border-zinc-800">
                 <button
                   type="button"
                   onClick={() => updateBlock(index, { theme: "light" })}
                   className={`flex items-center gap-1 px-2 py-1 text-[10px] font-medium transition-colors ${
                     block.theme === "light"
-                      ? "bg-zinc-100 text-zinc-900"
-                      : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+                      ? "bg-zinc-200 text-zinc-900"
+                      : "bg-zinc-900 text-zinc-600 hover:text-zinc-300"
                   }`}
                 >
                   <Sun className="w-3 h-3" /> Light
@@ -146,8 +148,8 @@ export default function ContentBlockBuilder({
                   onClick={() => updateBlock(index, { theme: "dark" })}
                   className={`flex items-center gap-1 px-2 py-1 text-[10px] font-medium transition-colors ${
                     block.theme === "dark"
-                      ? "bg-zinc-700 text-zinc-100"
-                      : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+                      ? "bg-zinc-800 text-gold"
+                      : "bg-zinc-900 text-zinc-600 hover:text-zinc-300"
                   }`}
                 >
                   <Moon className="w-3 h-3" /> Dark
@@ -185,7 +187,7 @@ export default function ContentBlockBuilder({
           {/* Block Fields */}
           <div className="p-4 space-y-3">
             <div>
-              <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+              <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                 Heading
               </label>
               <input
@@ -195,11 +197,11 @@ export default function ContentBlockBuilder({
                   updateBlock(index, { heading: e.target.value })
                 }
                 placeholder="Block heading..."
-                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 transition-colors"
               />
             </div>
             <div>
-              <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+              <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1 block">
                 Body
               </label>
               <RichTextEditor
@@ -210,7 +212,7 @@ export default function ContentBlockBuilder({
 
             {/* Image Upload */}
             <div>
-              <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1.5 block">
+              <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1.5 block">
                 Image
               </label>
               <input
@@ -232,39 +234,41 @@ export default function ContentBlockBuilder({
               />
 
               {block.image ? (
-                <div className="flex items-start gap-3">
-                  <div className="relative w-36 aspect-video rounded-lg overflow-hidden bg-zinc-800 shrink-0">
-                    <img
-                      src={block.image}
-                      alt={block.heading || `Block ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-800 ring-1 ring-zinc-700/40 group">
+                  <img
+                    src={block.image}
+                    alt={block.heading || `Block ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRefs.current.get(block.id)?.click()}
+                      disabled={!!validatingBlocks[block.id]}
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-700 text-xs font-medium text-zinc-200 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
+                    >
+                      {validatingBlocks[block.id] ? "Validating…" : "Change"}
+                    </button>
                     <button
                       type="button"
                       onClick={() => clearImage(index, block.id)}
-                      className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-700 text-xs font-medium text-red-400 hover:border-red-500/50 transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      Remove
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRefs.current.get(block.id)?.click()}
-                    disabled={!!validatingBlocks[block.id]}
-                    className="px-3 py-2 rounded-lg border border-dashed border-zinc-700 text-xs text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-50"
-                  >
-                    {validatingBlocks[block.id] ? "Validating..." : "Change"}
-                  </button>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={() => fileInputRefs.current.get(block.id)?.click()}
                   disabled={!!validatingBlocks[block.id]}
-                  className="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-dashed border-zinc-700 text-sm text-zinc-500 hover:text-zinc-300 hover:border-zinc-500 transition-colors disabled:opacity-50"
+                  className="w-full aspect-video rounded-xl border border-dashed border-zinc-700/80 bg-zinc-900/30 flex flex-col items-center justify-center gap-2 hover:border-gold/40 hover:bg-zinc-900/60 transition-all group disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  <ImagePlus className="w-4 h-4" />
-                  {validatingBlocks[block.id] ? "Validating..." : "Upload Image"}
+                  <ImagePlus className="w-6 h-6 text-zinc-700 group-hover:text-gold/50 transition-colors" />
+                  <p className="text-xs font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                    {validatingBlocks[block.id] ? "Validating…" : "Upload Image"}
+                  </p>
                 </button>
               )}
               <p className="text-[10px] text-zinc-600 mt-1">
@@ -284,9 +288,9 @@ export default function ContentBlockBuilder({
       <button
         type="button"
         onClick={addBlock}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-dashed border-zinc-700 text-sm font-medium text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-zinc-700/80 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500 hover:text-gold hover:border-gold/40 transition-colors"
       >
-        <Plus className="w-4 h-4" />
+        <Plus className="w-3.5 h-3.5" />
         Add Block
       </button>
     </div>

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { X, Plus, Trash2, Loader2, AlertTriangle, Info } from "lucide-react";
+import { X, Plus, Trash2, Loader2, AlertTriangle, Info, ImagePlus } from "lucide-react";
 import type { Pillar, ContentBlock } from "../lib/types/pillar";
 import { createPillar, updatePillar } from "../lib/api/pillar";
 import { ApiError } from "../lib/api/error";
@@ -169,12 +169,20 @@ function SectionHeader({
   description?: string;
 }) {
   return (
-    <div className="pb-2 mb-4 border-b border-zinc-800/60">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+    <div className="pb-3 mb-5 border-b border-zinc-800/60">
+      <div className="flex items-center gap-3">
+        <span className="h-px w-6 bg-gold/40" />
+        <p className="text-[10px] uppercase tracking-[0.3em] text-gold-dim">
+          Section
+        </p>
+      </div>
+      <h3 className="font-brand text-lg text-zinc-100 uppercase mt-1.5">
         {title}
       </h3>
       {description && (
-        <p className="text-[11px] text-zinc-600 mt-0.5">{description}</p>
+        <p className="text-[11px] text-zinc-500 mt-1.5 leading-relaxed">
+          {description}
+        </p>
       )}
     </div>
   );
@@ -525,7 +533,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         {/* Title */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">Title</label>
+            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">Title</label>
             <CharCounter current={titleLen} max={TITLE_MAX} />
           </div>
           <textarea
@@ -539,7 +547,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             placeholder="e.g. Brand Strategy & Identity Design"
             rows={1}
             maxLength={TITLE_MAX}
-            className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all resize-none overflow-hidden"
+            className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 focus:bg-zinc-800 transition-all resize-none overflow-hidden"
             style={{ minHeight: "42px" }}
           />
           {errors.title && (
@@ -551,35 +559,53 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           </FieldHint>
         </div>
 
-        {/* Slug */}
-        <div>
-          <label className="text-sm font-medium text-zinc-300 mb-1.5 block">
-            Slug
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-zinc-600 select-none">
-              /pillars/
-            </span>
-            <input
-              {...register("slug")}
-              onChange={(e) => {
-                setValue("slug", e.target.value, {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                });
-                setIsSlugManuallyEdited(true);
-              }}
-              placeholder="pillar-slug"
-              className="w-full pl-18 pr-3 py-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all font-mono"
-            />
+        {/* Slug + Launch URL — 2 col */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Slug */}
+          <div>
+            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1.5 block">
+              Slug
+            </label>
+            <div className="flex items-stretch rounded-lg border border-zinc-800/80 bg-zinc-900/60 overflow-hidden focus-within:border-gold/50 focus-within:ring-1 focus-within:ring-gold/20 transition-all">
+              <span className="px-3 py-2.5 text-[10px] text-zinc-600 select-none border-r border-zinc-800/80 font-mono whitespace-nowrap flex items-center">
+                /pillars/
+              </span>
+              <input
+                {...register("slug")}
+                onChange={(e) => {
+                  setValue("slug", e.target.value, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                  setIsSlugManuallyEdited(true);
+                }}
+                placeholder="pillar-slug"
+                className="flex-1 min-w-0 px-3 py-2.5 bg-transparent text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none font-mono"
+              />
+            </div>
+            {errors.slug && (
+              <p className="text-xs text-red-400 mt-1">{errors.slug.message}</p>
+            )}
+            <FieldHint>Auto-generated from title. Edit to customize.</FieldHint>
           </div>
-          {errors.slug && (
-            <p className="text-xs text-red-400 mt-1">{errors.slug.message}</p>
-          )}
-          <FieldHint>
-            URL-friendly identifier. Auto-generated from the title — edit
-            manually to customize.
-          </FieldHint>
+
+          {/* Launch URL */}
+          <div>
+            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em] mb-1.5 block">
+              Launch URL
+            </label>
+            <input
+              {...register("launchUrl")}
+              placeholder="https://example.com"
+              className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 focus:bg-zinc-800 transition-all"
+            />
+            {errors.launchUrl && (
+              <p className="text-xs text-red-400 mt-1">
+                {errors.launchUrl.message}
+              </p>
+            )}
+            <FieldHint>"Visit Website" button target. Must start with https://</FieldHint>
+          </div>
         </div>
       </section>
 
@@ -593,7 +619,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         {/* Description */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">
+            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">
               Description
             </label>
           </div>
@@ -611,7 +637,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             className={`w-full px-3.5 py-2.5 rounded-lg bg-zinc-800/80 border text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:bg-zinc-800 transition-all resize-none overflow-hidden ${
               descLen > DESCRIPTION_MAX
                 ? "border-red-500/60 focus:border-red-500"
-                : "border-zinc-700/80 focus:border-zinc-500"
+                : "border-zinc-700/80 focus:border-gold/50"
             }`}
             style={{ minHeight: "60px" }}
           />
@@ -633,7 +659,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         {/* Details */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">Details</label>
+            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">Details</label>
           </div>
           <textarea
             name={detailsRegistration.name}
@@ -645,7 +671,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             }}
             placeholder="Describe the scope, methodology, and outcomes of this pillar in detail. Expand on the description to give visitors a thorough understanding of what this pillar encompasses..."
             rows={4}
-            className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all resize-y leading-relaxed"
+            className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 focus:bg-zinc-800 transition-all resize-y leading-relaxed"
             style={{ minHeight: "120px", maxHeight: "400px" }}
           />
           <div className="flex items-center justify-between mt-1.5">
@@ -690,14 +716,22 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             onChange={handleImageSelect}
             className="hidden"
           />
-          <div className="flex items-start gap-4">
-            {imagePreview ? (
-              <div className="relative w-40 aspect-video rounded-lg overflow-hidden bg-zinc-800 shrink-0 ring-1 ring-zinc-700/40">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
+          {imagePreview ? (
+            <div className="relative aspect-video max-h-56 rounded-xl overflow-hidden bg-zinc-800 ring-1 ring-zinc-700/40 group">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={imageValidating}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-700 text-xs font-medium text-zinc-200 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
+                >
+                  {imageValidating ? "Validating…" : "Change"}
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -706,66 +740,34 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
                     setImageError("");
                     setValue("image", "");
                   }}
-                  className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-700 text-xs font-medium text-red-400 hover:border-red-500/50 transition-colors"
                 >
-                  <X className="w-3 h-3" />
+                  Remove
                 </button>
               </div>
-            ) : null}
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={imageValidating}
-                className="px-4 py-2.5 rounded-lg border border-dashed border-zinc-700 text-sm text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-              >
-                {imageValidating
-                  ? "Validating..."
-                  : imagePreview
-                    ? "Change Image"
-                    : "Upload Image"}
-              </button>
-              <p className="text-[10px] text-zinc-600">
-                JPEG, PNG, WebP, AVIF, GIF · Max{" "}
-                {DEFAULT_IMAGE_CONFIG.maxSizeLabel}
-              </p>
             </div>
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={imageValidating}
+              className="w-full aspect-video max-h-56 rounded-xl border border-dashed border-zinc-700/80 bg-zinc-900/30 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-gold/40 hover:bg-zinc-900/60 transition-all group disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <ImagePlus className="w-7 h-7 text-zinc-700 group-hover:text-gold/50 transition-colors" />
+              <p className="text-sm font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                {imageValidating ? "Validating…" : "Upload Cover Image"}
+              </p>
+              <p className="text-[10px] text-zinc-600">
+                JPEG · PNG · WebP · AVIF · Max {DEFAULT_IMAGE_CONFIG.maxSizeLabel}
+              </p>
+            </button>
+          )}
           {imageError && (
             <div className="flex items-center gap-1.5 mt-2 text-xs text-red-400">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
               <span>{imageError}</span>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* ═══════════════ SECTION: Links ═══════════════ */}
-      <section>
-        <SectionHeader
-          title="Links"
-          description="External URL for the pillar project"
-        />
-
-        {/* Launch URL */}
-        <div>
-          <label className="text-sm font-medium text-zinc-300 mb-1.5 block">
-            Launch URL
-          </label>
-          <input
-            {...register("launchUrl")}
-            placeholder="https://example.com"
-            className="w-full px-3.5 py-2.5 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all"
-          />
-          {errors.launchUrl && (
-            <p className="text-xs text-red-400 mt-1">
-              {errors.launchUrl.message}
-            </p>
-          )}
-          <FieldHint>
-            The "Visit Website" button will link to this URL. Must be a fully
-            qualified URL (e.g. https://...).
-          </FieldHint>
         </div>
       </section>
 
@@ -779,7 +781,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         {/* Tags */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">Tags</label>
+            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">Tags</label>
             <span className="text-[11px] text-zinc-600 tabular-nums">
               {tags.length}/{MAX_TAGS}
             </span>
@@ -789,10 +791,10 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
               <span
                 key={tag}
                 onClick={() => removeTag(tag)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-800 text-xs font-medium text-zinc-300 cursor-pointer hover:bg-red-950/40 hover:text-red-300 transition-colors group"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-zinc-700/60 text-[10px] font-medium text-zinc-400 cursor-pointer hover:border-red-900/50 hover:text-red-300 hover:bg-red-950/20 transition-all group uppercase tracking-[0.12em]"
               >
                 {tag}
-                <X className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                <X className="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity" />
               </span>
             ))}
             {tags.length === 0 && (
@@ -814,13 +816,13 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
               placeholder="Type a tag and press Enter"
               maxLength={30}
               disabled={tags.length >= MAX_TAGS}
-              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 focus:bg-zinc-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             />
             <button
               type="button"
               onClick={addTag}
               disabled={tags.length >= MAX_TAGS || !tagInput.trim()}
-              className="px-3 py-2 rounded-lg bg-white border border-zinc-700 text-sm text-zinc-700 hover:text-zinc-900 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              className="px-3 py-2 rounded-lg border border-zinc-700/80 text-sm text-zinc-400 hover:text-gold hover:border-gold/40 transition-colors disabled:opacity-30 disabled:pointer-events-none"
             >
               Add
             </button>
@@ -837,7 +839,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         {/* Services */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium text-zinc-300">
+            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-[0.2em]">
               Services
             </label>
             <span className="text-[11px] text-zinc-600 tabular-nums">
@@ -856,7 +858,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
                     onChange={(e) => updateService(index, e.target.value)}
                     placeholder={`e.g. ${["Brand Identity", "UX Research", "Web Development", "Content Strategy", "Visual Design", "Motion Design"][index % 6]}`}
                     maxLength={SERVICE_MAX_LENGTH}
-                    className="w-full px-3 py-2 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all pr-12"
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-gold/50 focus:bg-zinc-800 transition-all pr-12"
                   />
                   {service.length > 0 && (
                     <span
@@ -885,7 +887,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
             type="button"
             onClick={addService}
             disabled={services.length >= MAX_SERVICES}
-            className="flex items-center ml-7 gap-1.5 mt-2 px-3 py-1.5 text-xs font-medium border-2 bg-white rounded border-zinc-100 text-zinc-700 hover:text-zinc-900 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+            className="flex items-center ml-7 gap-1.5 mt-2 px-3 py-1.5 text-xs font-medium border border-zinc-700/60 rounded-lg text-zinc-500 hover:text-gold hover:border-gold/40 bg-transparent transition-colors disabled:opacity-30 disabled:pointer-events-none"
           >
             <Plus className="w-3 h-3" />
             Add Service
@@ -989,22 +991,24 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         onToggle={() => setShowPreview((v) => !v)}
       />
 
-      {/* ═══════════════ Submit ═══════════════ */}
-      <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-zinc-100 text-zinc-900 text-sm font-semibold hover:bg-white transition-colors disabled:opacity-50 disabled:pointer-events-none"
-        >
-          {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-          {mode === "create" ? "Create Pillar" : "Save Changes"}
-        </button>
+      {/* ═══════════════ Submit — sticky bottom bar ═══════════════ */}
+      <div
+        className="sticky bottom-4 z-30 mt-8 -mx-2 px-3 py-3 rounded-2xl border border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md shadow-2xl shadow-black/40 flex items-center justify-between gap-3"
+      >
         <button
           type="button"
           onClick={() => navigate("/projects")}
-          className="px-6 py-3 rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+          className="px-5 py-2.5 rounded-lg text-[11px] font-medium uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 transition-all"
         >
           Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-gold text-zinc-950 text-[11px] font-semibold uppercase tracking-[0.2em] hover:bg-gold-hover transition-all disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-gold/15"
+        >
+          {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+          {mode === "create" ? "Create Pillar" : "Save Changes"}
         </button>
       </div>
     </form>

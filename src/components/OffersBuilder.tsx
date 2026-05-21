@@ -1,11 +1,19 @@
 import { Trash2, ChevronUp, ChevronDown, Plus } from "lucide-react";
 
+export type OfferCurrency = "EUR" | "USD" | "CHF" | "GBP" | "GEL";
+
 export interface Offer {
   title: string;
   tier: "copper" | "silver" | "gold";
   description: string;
   deliverable: string;
+  /** Optional numeric price. null/undefined = no price shown ("Contact for quote"). */
+  price?: number | null;
+  /** Defaults to EUR. Only meaningful when price is set. */
+  currency?: OfferCurrency;
 }
+
+const CURRENCIES: OfferCurrency[] = ["EUR", "USD", "CHF", "GBP", "GEL"];
 
 interface OffersBuilderProps {
   offers: Offer[];
@@ -19,6 +27,8 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
       tier: "copper",
       description: "",
       deliverable: "",
+      price: null,
+      currency: "EUR",
     };
     onChange((prev) => [...prev, newOffer]);
   };
@@ -163,6 +173,53 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                 rows={2}
                 className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-y"
               />
+            </div>
+
+            {/* Pricing row — leave price empty for "Contact for quote" */}
+            <div className="grid grid-cols-[1fr_auto] gap-3">
+              <div>
+                <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+                  Price{" "}
+                  <span className="text-zinc-600 normal-case tracking-normal">
+                    (optional — leave empty for "Contact for quote")
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={offer.price ?? ""}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    updateOffer(index, {
+                      price: raw === "" ? null : Number(raw),
+                    });
+                  }}
+                  placeholder="e.g. 1500"
+                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1 block">
+                  Currency
+                </label>
+                <select
+                  value={offer.currency ?? "EUR"}
+                  onChange={(e) =>
+                    updateOffer(index, {
+                      currency: e.target.value as OfferCurrency,
+                    })
+                  }
+                  className="px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 transition-colors"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>

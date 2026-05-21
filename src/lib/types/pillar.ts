@@ -19,11 +19,17 @@ export interface PillarTheme {
   accent: string;
 }
 
+export type OfferCurrency = "EUR" | "USD" | "CHF" | "GBP" | "GEL";
+
 export interface Offer {
   title: string;
   tier: "copper" | "silver" | "gold";
   description: string;
   deliverable: string;
+  /** Optional numeric price. null/undefined = no price shown ("Contact for quote"). */
+  price?: number | null;
+  /** Defaults to EUR. Only meaningful when price is set. */
+  currency?: OfferCurrency;
 }
 
 export interface Pillar {

@@ -94,15 +94,41 @@ function toTheme(val: string | PillarTheme | undefined): PillarTheme {
   }
 }
 
+const VALID_TIERS = ["copper", "silver", "gold"] as const;
+const VALID_CURRENCIES = ["EUR", "USD", "CHF", "GBP", "GEL"] as const;
+
+function normalizeOffer(o: unknown): Pillar["offers"][number] {
+  const obj = o as Record<string, unknown>;
+  const rawPrice = obj.price;
+  const price =
+    rawPrice !== null && rawPrice !== undefined && rawPrice !== ""
+      ? Number(rawPrice)
+      : null;
+  const rawCurrency = String(obj.currency ?? "").toUpperCase();
+  const currency = (VALID_CURRENCIES as readonly string[]).includes(rawCurrency)
+    ? (rawCurrency as Pillar["offers"][number]["currency"])
+    : "EUR";
+  const rawTier = String(obj.tier ?? "");
+  const tier = (VALID_TIERS as readonly string[]).includes(rawTier)
+    ? (rawTier as Pillar["offers"][number]["tier"])
+    : "copper";
+  return {
+    title: String(obj.title ?? ""),
+    tier,
+    description: String(obj.description ?? ""),
+    deliverable: String(obj.deliverable ?? ""),
+    price,
+    currency,
+  };
+}
+
 function toOffers(val: string | unknown[] | undefined): Pillar["offers"] {
   if (!val) return [];
-  if (Array.isArray(val)) return val as Pillar["offers"];
-  try {
-    const parsed = JSON.parse(String(val));
-    return Array.isArray(parsed) ? (parsed as Pillar["offers"]) : [];
-  } catch {
-    return [];
-  }
+  const raw = Array.isArray(val) ? val : (() => {
+    try { const p = JSON.parse(String(val)); return Array.isArray(p) ? p : []; }
+    catch { return []; }
+  })();
+  return raw.map(normalizeOffer);
 }
 
 const VALID_BLOCK_TYPES = ["rich-text", "image", "video"];

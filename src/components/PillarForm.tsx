@@ -189,6 +189,8 @@ const pillarSchema = z.object({
       tier: z.enum(["copper", "silver", "gold"]),
       description: z.string(),
       deliverable: z.string(),
+      price: z.number().nullable().optional(),
+      currency: z.enum(["EUR", "USD", "CHF", "GBP", "GEL"]).optional(),
     }),
   ),
   title: z

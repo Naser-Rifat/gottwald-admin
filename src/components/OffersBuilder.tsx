@@ -196,6 +196,7 @@ export const OffersBuilder = ({ offers, onChange }: OffersBuilderProps) => {
                       price: raw === "" ? null : Number(raw),
                     });
                   }}
+                  onWheel={(e) => e.currentTarget.blur()}
                   placeholder="e.g. 1500"
                   className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
                 />

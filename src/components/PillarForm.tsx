@@ -254,6 +254,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
     handleSubmit,
     setValue,
     watch,
+    getValues,
     setError,
     formState: { errors },
   } = useForm<PillarFormValues>({
@@ -287,10 +288,11 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
     (fn: (prev: PillarFormValues["offers"]) => PillarFormValues["offers"]) => {
       setValue(
         "offers",
-        fn((watch("offers") as PillarFormValues["offers"]) || []),
+        fn((getValues("offers") as PillarFormValues["offers"]) || []),
+        { shouldDirty: true },
       );
     },
-    [watch, setValue],
+    [getValues, setValue],
   );
 
   const tags = watch("tags");
@@ -441,8 +443,15 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         return nextBody === (b.body || "") ? b : { ...b, body: nextBody };
       });
 
+      const normalizedOffers = (data.offers || []).map((o) => ({
+        ...o,
+        price: o.price ?? null,
+        currency: o.currency ?? "EUR",
+      }));
+
       const pillarData: Pillar = {
         ...data,
+        offers: normalizedOffers,
         services: cleanedServices,
         image: imageUrl,
         contentBlocks: normalizedContentBlocks,

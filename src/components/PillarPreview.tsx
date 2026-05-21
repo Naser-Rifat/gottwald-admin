@@ -32,13 +32,15 @@ function hexToRgba(hex: string, alpha: number): string {
 
 function formatPrice(price: number, currency: string): string {
   try {
-    return new Intl.NumberFormat("de-DE", {
+    const isWhole = price % 1 === 0;
+    return new Intl.NumberFormat(undefined, {
       style: "currency",
       currency,
-      maximumFractionDigits: price % 1 === 0 ? 0 : 2,
+      minimumFractionDigits: isWhole ? 0 : 2,
+      maximumFractionDigits: isWhole ? 0 : 2,
     }).format(price);
   } catch {
-    return `${currency} ${price}`;
+    return `${price} ${currency}`;
   }
 }
 

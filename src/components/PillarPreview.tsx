@@ -30,6 +30,18 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function formatPrice(price: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("de-DE", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: price % 1 === 0 ? 0 : 2,
+    }).format(price);
+  } catch {
+    return `${currency} ${price}`;
+  }
+}
+
 function normalizeRichTextHtml(html: string): string {
   const raw = (html || "").trim();
   if (!raw) return raw;
@@ -918,12 +930,13 @@ function OffersPanel({
         {/* Cards grid (scaled down from public) */}
         <div
           style={{
-            padding: "16px 22px 22px",
+            padding: "4px 20px 20px",
             display: "grid",
             gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: "16px",
+            alignItems: "start",
+            gap: "14px",
             flex: 1,
-            overflow: "hidden",
+            overflow: "visible",
           }}
         >
           {cards.map(({ tier, offer }, idx) => {
@@ -938,123 +951,114 @@ function OffersPanel({
                 key={`${tier}-${idx}`}
                 style={{
                   minWidth: 0,
-                  borderRadius: "28px",
+                  borderRadius: "32px",
                   overflow: "hidden",
                   position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
                   border: `1px solid ${isCenter ? tc.borderHover : tc.border}`,
-                  backgroundColor: isEmpty ? "rgba(5, 8, 12, 0.38)" : "rgba(5, 8, 12, 0.56)",
+                  backgroundColor: isEmpty ? "rgba(5, 8, 12, 0.38)" : "rgba(5, 8, 12, 0.60)",
                   boxShadow: isCenter
-                    ? `0 22px 80px -18px ${hexToRgba(tc.accent, 0.55)}`
-                    : "0 12px 44px -20px rgba(0,0,0,0.75)",
-                  transform: isCenter ? "translateY(-10px) scale(1.03)" : "translateY(4px)",
-                  opacity: isEmpty ? 0.55 : isCenter ? 1 : 0.9,
+                    ? `0 20px 80px -10px ${hexToRgba(tc.accent, 0.40)}`
+                    : "0 10px 40px -10px rgba(0,0,0,0.5)",
+                  transform: isCenter ? "translateY(-8px) scale(1.03)" : "translateY(3px)",
+                  opacity: isEmpty ? 0.55 : isCenter ? 1 : 0.85,
                 }}
               >
                 {/* Header plate */}
                 <div
                   style={{
-                    padding: "22px 18px 34px",
+                    paddingTop: "18px",
+                    paddingBottom: "30px",
+                    paddingLeft: "10px",
+                    paddingRight: "10px",
                     backgroundColor: "rgba(2, 4, 8, 0.40)",
                     clipPath: "polygon(0 0, 100% 0, 100% 86%, 50% 100%, 0 86%)",
                     position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
                   }}
                 >
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: "1px",
-                      background: `linear-gradient(90deg, transparent, ${hexToRgba(tc.accent, 0.75)}, transparent)`,
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background: `radial-gradient(ellipse at top, ${hexToRgba(tc.accent, 0.25)} 0%, transparent 70%)`,
-                      opacity: 0.55,
-                      pointerEvents: "none",
-                    }}
-                  />
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${hexToRgba(tc.accent, 0.80)}, transparent)` }} />
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(255,255,255,0.03), transparent)", pointerEvents: "none" }} />
+                  <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at top, ${hexToRgba(tc.accent, 0.30)} 0%, transparent 70%)`, opacity: 0.40, pointerEvents: "none" }} />
 
-                  <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
-                    <span
-                      style={{
-                        fontSize: "9px",
-                        letterSpacing: "0.30em",
-                        textTransform: "uppercase",
-                        fontWeight: 800,
-                        color: tc.accent,
-                        padding: "8px 14px",
-                        borderRadius: "999px",
-                        backgroundColor: "rgba(0,0,0,0.45)",
-                        border: "1px solid rgba(255,255,255,0.10)",
-                        backdropFilter: "blur(10px)",
-                      }}
-                    >
-                      {tc.label} Pack
-                    </span>
-                  </div>
+                  <span
+                    style={{
+                      position: "relative", zIndex: 10,
+                      fontSize: "8px", letterSpacing: "0.30em", textTransform: "uppercase", fontWeight: 800,
+                      color: tc.accent, marginBottom: "8px", padding: "4px 10px",
+                      borderRadius: "999px", backgroundColor: "rgba(0,0,0,0.50)",
+                      border: "1px solid rgba(255,255,255,0.10)",
+                    }}
+                  >
+                    {tc.label} Pack
+                  </span>
 
                   <h4
                     style={{
-                      margin: 0,
+                      position: "relative", zIndex: 10, margin: 0,
                       fontFamily: "var(--font-serif), Georgia, serif",
-                      fontSize: "18px",
-                      fontWeight: 600,
-                      lineHeight: 1.15,
-                      color: TXT_LIGHT,
-                      textAlign: "center",
-                      padding: "0 10px",
+                      fontSize: "16px", fontWeight: 600, lineHeight: 1.2,
+                      color: TXT_LIGHT, textAlign: "center", padding: "0 8px",
                       textShadow: "0 2px 18px rgba(0,0,0,0.6)",
-                      minHeight: "44px",
                     }}
                   >
                     {offer?.title || "Add offer"}
                   </h4>
+
+                  <div style={{ position: "relative", zIndex: 10, marginTop: "10px", textAlign: "center" }}>
+                    {offer && typeof offer.price === "number" && offer.price >= 0 ? (
+                      <span
+                        style={{
+                          display: "block",
+                          fontFamily: "var(--font-serif), Georgia, serif",
+                          fontSize: "22px", fontWeight: 600, color: TXT_LIGHT,
+                          letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums",
+                          textShadow: `0 2px 12px ${tc.accent}55`,
+                        }}
+                      >
+                        {formatPrice(offer.price, offer.currency ?? "EUR")}
+                      </span>
+                    ) : (
+                      <span style={{ display: "block", fontSize: "8px", letterSpacing: "0.25em", textTransform: "uppercase", fontWeight: 700, color: "rgba(255,255,255,0.70)" }}>
+                        Contact for quote
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Body */}
-                <div style={{ padding: "16px 18px 18px", marginTop: "-14px", height: "calc(100% - 120px)", display: "flex", flexDirection: "column" }}>
-                  <div style={{ flex: 1, overflow: "hidden" }}>
-                    <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                      {(features.length ? features : ["Offer description"]).slice(0, 5).map((f, fIdx) => (
-                        <li key={fIdx} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                          <span
-                            style={{
-                              width: "18px",
-                              height: "18px",
-                              borderRadius: "999px",
-                              border: `1px solid ${hexToRgba(tc.accent, 0.70)}`,
-                              color: tc.accent,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "rgba(0,0,0,0.18)",
-                              flexShrink: 0,
-                              marginTop: "1px",
-                              boxShadow: "inset 0 0 10px rgba(0,0,0,0.55)",
-                            }}
-                          >
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                          </span>
-                          <span style={{ fontSize: "11px", lineHeight: 1.55, color: "rgba(255,255,255,0.88)" }}>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                <div style={{ padding: "14px 16px 16px", marginTop: "-12px", display: "flex", flexDirection: "column" }}>
+                  <ul style={{ listStyle: "none", padding: 0, margin: "6px 0 10px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {(features.length ? features : ["Offer description"]).slice(0, 4).map((f, fIdx) => (
+                      <li key={fIdx} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                        <span
+                          style={{
+                            width: "16px", height: "16px", borderRadius: "999px",
+                            border: `1px solid ${tc.accent}80`, color: tc.accent,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            backgroundColor: "rgba(0,0,0,0.20)", flexShrink: 0, marginTop: "1px",
+                          }}
+                        >
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </span>
+                        <span style={{ fontSize: "11px", lineHeight: 1.45, color: "rgba(255,255,255,0.88)" }}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                  {/* Deliverable + CTA */}
-                  <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.10)" }}>
-                    <div style={{ textAlign: "center" }}>
-                      <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 800, color: tc.accent }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+                    <div style={{ width: "100%", textAlign: "center", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.10)" }}>
+                      <span style={{ display: "block", fontSize: "8px", letterSpacing: "0.20em", textTransform: "uppercase", fontWeight: 800, color: tc.accent, marginBottom: "4px" }}>
                         Deliverable
                       </span>
-                      <span style={{ display: "block", marginTop: "6px", fontSize: "11px", lineHeight: 1.45, color: "rgba(255,255,255,0.92)" }}>
+                      <span style={{ display: "block", fontSize: "10px", lineHeight: 1.4, color: "rgba(255,255,255,0.92)", fontWeight: 500 }}>
                         {offer?.deliverable || "Deliverable"}
                       </span>
                     </div>
@@ -1063,22 +1067,17 @@ function OffersPanel({
                       type="button"
                       disabled
                       style={{
-                        marginTop: "12px",
-                        width: "100%",
-                        padding: "12px 14px",
-                        borderRadius: "999px",
-                        border: `1px solid ${hexToRgba(tc.accent, 0.55)}`,
-                        background: `linear-gradient(90deg, ${hexToRgba(tc.accent, 0.28)} 0%, ${hexToRgba(tc.accent, 0.10)} 100%)`,
-                        color: TXT_LIGHT,
-                        fontSize: "10px",
-                        fontWeight: 800,
-                        letterSpacing: "0.25em",
-                        textTransform: "uppercase",
-                        cursor: "not-allowed",
+                        width: "100%", padding: "8px 12px", borderRadius: "999px",
+                        border: `1px solid ${hexToRgba(tc.accent, 0.60)}`,
+                        background: `linear-gradient(90deg, ${hexToRgba(tc.accent, 0.40)} 0%, ${hexToRgba(tc.accent, 0.15)} 100%)`,
+                        color: TXT_LIGHT, fontSize: "8px", fontWeight: 800,
+                        letterSpacing: "0.25em", textTransform: "uppercase",
+                        cursor: "not-allowed", position: "relative", overflow: "hidden",
                         opacity: isEmpty ? 0.55 : 1,
                       }}
                     >
-                      Get Started
+                      <span style={{ position: "relative", zIndex: 10 }}>GET STARTED</span>
+                      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${hexToRgba(tc.accent, 0.80)}, transparent)` }} />
                     </button>
                   </div>
                 </div>

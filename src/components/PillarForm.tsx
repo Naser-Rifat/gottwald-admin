@@ -478,26 +478,29 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
       navigate("/projects");
     } catch (err) {
       if (err instanceof ApiError && err.data) {
+        const FIELD_KEYS = [
+          "title",
+          "slug",
+          "description",
+          "details",
+          "launchUrl",
+          "tags",
+          "services",
+          "theme",
+          "image",
+        ];
+        const ENVELOPE_KEYS = ["detail", "message", "status", "success"];
         Object.entries(err.data).forEach(([key, messages]) => {
           const message = Array.isArray(messages) ? messages[0] : messages;
-          if (
-            [
-              "title",
-              "slug",
-              "description",
-              "details",
-              "launchUrl",
-              "tags",
-              "services",
-              "theme",
-              "image",
-            ].includes(key)
-          ) {
+          if (FIELD_KEYS.includes(key)) {
             setError(key as keyof PillarFormValues, {
               type: "server",
               message: String(message),
             });
-          } else if (key !== "detail" && key !== "message") {
+          } else if (
+            !ENVELOPE_KEYS.includes(key) &&
+            typeof message === "string"
+          ) {
             toast.error(`${key}: ${message}`);
           }
         });

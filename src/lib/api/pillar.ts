@@ -1,4 +1,4 @@
-import type { ContentBlock, CreatePillarPayload, Pillar, PillarTheme, UpdatePillarPayload } from "../types/pillar";
+import type { CoachingMatrix, ContentBlock, CreatePillarPayload, Pillar, PillarTheme, UpdatePillarPayload } from "../types/pillar";
 import { MOCK_PROJECTS } from "../mock/pillar.mock";
 import { refreshAccessToken, clearSession, updateTokens, STORAGE_KEYS } from "./auth";
 import { ApiError } from "./error";
@@ -32,6 +32,7 @@ interface ApiPillar {
   tags?: string | string[];
   services?: string | string[];
   offers?: string | unknown[];
+  coaching_matrix?: string | Record<string, unknown>;
   theme?: string | PillarTheme;
   image?: string;
   order?: number;
@@ -132,6 +133,31 @@ function toOffers(val: string | unknown[] | undefined): Pillar["offers"] {
   return raw.map(normalizeOffer);
 }
 
+/**
+ * Coaching matrix arrives from the API as either a nested object or a JSON
+ * string (multipart). Return {} for anything non-object; the builder itself
+ * normalises to { tracks: {} } on first render.
+ */
+function toCoachingMatrix(
+  val: string | Record<string, unknown> | undefined,
+): CoachingMatrix | Record<string, never> {
+  if (!val) return {};
+  const raw =
+    typeof val === "string"
+      ? (() => {
+          try {
+            return JSON.parse(val);
+          } catch {
+            return null;
+          }
+        })()
+      : val;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const obj = raw as Record<string, unknown>;
+  if (!obj.tracks || typeof obj.tracks !== "object") return {};
+  return obj as unknown as CoachingMatrix;
+}
+
 const VALID_BLOCK_TYPES = ["rich-text", "image", "video"];
 
 function mapApiPillarToPillar(api: ApiPillar): Pillar {
@@ -161,6 +187,7 @@ function mapApiPillarToPillar(api: ApiPillar): Pillar {
     tags: toArray(api.tags),
     services: toArray(api.services),
     offers: toOffers(api.offers),
+    coachingMatrix: toCoachingMatrix(api.coaching_matrix),
     theme: toTheme(api.theme),
     contentBlocks: blocks,
     order: api.order ?? 0,
@@ -177,6 +204,8 @@ function buildFormData(p: CreatePillarPayload | UpdatePillarPayload, imageFile?:
   if (p.tags != null) fd.append("tags", JSON.stringify(toArray(p.tags)));
   if (p.services != null) fd.append("services", JSON.stringify(toArray(p.services)));
   if (p.offers != null) fd.append("offers", JSON.stringify(p.offers));
+  if (p.coachingMatrix != null)
+    fd.append("coaching_matrix", JSON.stringify(p.coachingMatrix));
   if (p.theme != null) fd.append("theme", JSON.stringify(p.theme));
   fd.append("is_active", "true");
   if (p.contentBlocks != null) {

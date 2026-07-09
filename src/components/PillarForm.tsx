@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { X, Plus, Trash2, Loader2, AlertTriangle, Info, ImagePlus } from "lucide-react";
-import type { Pillar, ContentBlock } from "../lib/types/pillar";
+import type { Pillar, ContentBlock, CoachingMatrix } from "../lib/types/pillar";
 import { createPillar, updatePillar } from "../lib/api/pillar";
 import { ApiError } from "../lib/api/error";
 import {
@@ -15,6 +15,9 @@ import {
 import ContentBlockBuilder from "./ContentBlockBuilder";
 import PillarPreview from "./PillarPreview";
 import { OffersBuilder } from "./OffersBuilder";
+import { CoachingMatrixBuilder } from "./CoachingMatrixBuilder";
+
+const COACHING_SLUG = "coaching-mentoring";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
@@ -223,6 +226,8 @@ const pillarSchema = z.object({
     accent: z.string(),
   }),
   image: z.string().optional(),
+  // Loose schema — backend does strict shape validation.
+  coachingMatrix: z.any().optional(),
 });
 
 type PillarFormValues = z.infer<typeof pillarSchema>;
@@ -282,6 +287,7 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         accent: "#A8B4B8",
       },
       image: initialData?.image || "",
+      coachingMatrix: initialData?.coachingMatrix ?? {},
     },
   });
 
@@ -312,6 +318,21 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
   const watchedDetails = watch("details");
   const watchedLaunchUrl = watch("launchUrl");
   const watchOffers = watch("offers");
+  const watchCoachingMatrix = watch("coachingMatrix");
+
+  const handleCoachingMatrixChange = useCallback(
+    (fn: (prev: CoachingMatrix) => CoachingMatrix) => {
+      const current = (getValues("coachingMatrix") as CoachingMatrix | Record<string, never>) ?? {};
+      const normalized: CoachingMatrix =
+        "tracks" in current && current.tracks
+          ? (current as CoachingMatrix)
+          : { tracks: {} };
+      setValue("coachingMatrix", fn(normalized), { shouldDirty: true });
+    },
+    [getValues, setValue],
+  );
+
+  const isCoachingPillar = (watch("slug") || "") === COACHING_SLUG;
 
   const previewContentBlocks = contentBlocks.map((b) => {
     if (b.type !== "rich-text") return b;
@@ -457,12 +478,26 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
         currency: o.currency ?? "EUR",
       }));
 
+      // Only coaching pillar submits its matrix; others send {} to keep
+      // the field unset without accidentally overwriting server state.
+      const rawMatrix = (data.coachingMatrix as
+        | CoachingMatrix
+        | Record<string, never>
+        | undefined) ?? {};
+      const coachingMatrix: CoachingMatrix | Record<string, never> =
+        data.slug === COACHING_SLUG
+          ? "tracks" in rawMatrix && rawMatrix.tracks
+            ? (rawMatrix as CoachingMatrix)
+            : { tracks: {} }
+          : {};
+
       const pillarData: Pillar = {
         ...data,
         offers: normalizedOffers,
         services: cleanedServices,
         image: imageUrl,
         contentBlocks: normalizedContentBlocks,
+        coachingMatrix,
       };
 
       if (mode === "create") {
@@ -952,16 +987,34 @@ export default function PillarForm({ mode, initialData }: PillarFormProps) {
           </span>
         </div>
       </section>
-      {/* ═══════════════ Offers ═══════════════ */}
+      {/* ═══════════════ Offers / Coaching Matrix ═══════════════ */}
       <section>
-        <SectionHeader
-          title="Offers"
-          description="Manage service tiers and strategic offerings"
-        />
-        <OffersBuilder
-          offers={(watchOffers as PillarFormValues["offers"]) || []}
-          onChange={handleOffersChange}
-        />
+        {isCoachingPillar ? (
+          <>
+            <SectionHeader
+              title="Coaching Matrix"
+              description="3 tracks × 2 variants (Business/Personal) × 3 stages (Session/Intensive/Retainer)"
+            />
+            <CoachingMatrixBuilder
+              matrix={
+                (watchCoachingMatrix as CoachingMatrix | Record<string, never>) ??
+                {}
+              }
+              onChange={handleCoachingMatrixChange}
+            />
+          </>
+        ) : (
+          <>
+            <SectionHeader
+              title="Offers"
+              description="Manage service tiers and strategic offerings"
+            />
+            <OffersBuilder
+              offers={(watchOffers as PillarFormValues["offers"]) || []}
+              onChange={handleOffersChange}
+            />
+          </>
+        )}
       </section>
       {/* ═══════════════ Content Blocks ═══════════════ */}
       <section>
